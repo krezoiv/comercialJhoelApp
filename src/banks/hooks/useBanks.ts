@@ -1,55 +1,53 @@
 import { useEffect, useState } from "react";
 import { bankService } from "../services/bank.service";
-import type { BankAccount, BankGroup } from "../interfaces/bank.interface";
-
+import type { BankGroup } from "../interfaces/bank.interface"; // 🔥 FIX
+import type { BankApiResponse } from "../interfaces/bank-api-response";
 export const useBanks = () => {
   const [banks, setBanks] = useState<BankGroup[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadBanks();
-  }, []);
-
-  const loadBanks = async () => {
+  const fetchBanks = async () => {
     try {
-      const data: BankAccount[] = await bankService.getBankAccounts();
+      setLoading(true);
 
-      console.log("DATA 👉", data);
+      // 🔥 TIPADO AQUÍ
+      const raw: BankApiResponse[] = await bankService.getBankAccounts();
 
-      if (!data) {
-        setBanks([]);
-        return;
-      }
+      const grouped: Record<string, BankGroup> = {};
 
-      const grouped = data.reduce<Record<string, BankGroup>>((acc, item) => {
-        const bankName = item.bankName;
-
-        if (!acc[bankName]) {
-          acc[bankName] = {
-            bank: bankName,
+      raw.forEach((item) => {
+        if (!grouped[item.bankName]) {
+          grouped[item.bankName] = {
+            bank: item.bankName,
             accounts: [],
           };
         }
 
-        acc[bankName].accounts.push({
+        grouped[item.bankName].accounts.push({
           number: item.bankAccountNumber,
           name: item.bankAccountName,
-          accountTypeName: item.accountTypeName,
           inicial: Number(item.initialBalance),
           final: Number(item.finalBalance),
+          accountTypeName: item.accountTypeName,
           bankAccountNumber: item.bankAccountNumber,
         });
-
-        return acc;
-      }, {});
+      });
 
       setBanks(Object.values(grouped));
     } catch (error) {
-      console.error("Error cargando bancos", error);
+      console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
-  return { banks, loading };
+  useEffect(() => {
+    fetchBanks();
+  }, []);
+
+  return {
+    banks,
+    loading,
+    refetch: fetchBanks,
+  };
 };

@@ -1,23 +1,19 @@
-import axios from "axios";
-
-const api = axios.create({
-  baseURL: "http://localhost:3000",
-});
-
-// interceptor simple
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("auth_token"); // 🔥 ESTE ERA EL ERROR
-
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-
-  return config;
-});
+import { api } from "../../shared/services/api";
 
 export const bankService = {
   getBankAccounts: async () => {
-    const response = await api.get("/banks-accounts");
-    return response.data.data;
+    const res = await api.get("/banks-accounts");
+    return res.data.data;
+  },
+
+  updateBalances: async (
+    payload: {
+      accountNumber: string;
+      initialBalance: number;
+      finalBalance: number;
+    }[],
+  ) => {
+    const res = await api.put("/banks-accounts/update-balances", payload);
+    return res.data;
   },
 };
