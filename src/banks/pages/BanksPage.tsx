@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
+//import confetti from "canvas-confetti";
 import { Navbar } from "../../dashboard/components/Navbar";
 import { Sidebar } from "../../dashboard/components/Sidebar";
 import { bankPageStyles } from "../styles/banks.styles";
@@ -10,13 +11,57 @@ type Account = BankGroup["accounts"][number];
 
 export const BanksPage = () => {
   const [search, setSearch] = useState("");
-  const { banks, loading } = useBanks();
+  //const { banks, loading } = useBanks();
+  const { banks, loading, refetch } = useBanks();
 
   const [editedValues, setEditedValues] = useState<Record<string, string>>({});
   const [savedValues, setSavedValues] = useState<Record<string, number>>({});
   const [editingRows, setEditingRows] = useState<Record<string, boolean>>({});
   const [hasChanges, setHasChanges] = useState(false);
   const [autoSaved, setAutoSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [isScrolling, setIsScrolling] = useState(false);
+
+  useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout>;
+
+    const handleScroll = () => {
+      setIsScrolling(true);
+
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        setIsScrolling(false);
+      }, 200);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout>;
+
+    const handleScroll = () => {
+      setIsScrolling(true);
+
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        setIsScrolling(false);
+      }, 200);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      clearTimeout(timeout);
+    };
+  }, []);
 
   const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
@@ -133,33 +178,40 @@ export const BanksPage = () => {
 
   const handleSaveAll = async () => {
     try {
-      // 🔥 recorrer TODOS los bancos y cuentas
-      const payload = banks.flatMap((bank) =>
-        bank.accounts.map((acc) => {
-          const rawValue =
-            editedValues[acc.number] ??
-            savedValues[acc.number] ??
-            acc.final ??
-            0;
+      setSaving(true);
+      setSaved(false);
 
-          return {
-            accountNumber: acc.number,
-            finalBalance: rawValue === "" ? 0 : Number(rawValue),
-          };
-        }),
-      );
+      const payload = Object.keys(editedValues).map((key) => ({
+        accountNumber: key,
+        finalBalance: editedValues[key] === "" ? 0 : Number(editedValues[key]),
+      }));
 
-      console.log("📦 Payload FINAL:", payload);
+      if (payload.length === 0) {
+        setSaving(false);
+        console.warn("⚠️ No hay cambios para guardar");
+        return;
+      }
 
       await bankService.updateFinalBalances(payload);
 
-      console.log("✅ Guardado en BD");
+      // 🔥 REFRESH DATA (CLAVE)
+      await bankService.updateFinalBalances(payload);
 
-      // 🔥 limpiar cambios
+      // 🔥 REFRESH CORRECTO
+      await refetch();
+
+      setSaved(true);
+      setShowToast(true);
+
       setEditedValues({});
       setHasChanges(false);
+
+      setTimeout(() => setSaved(false), 2000);
+      setTimeout(() => setShowToast(false), 3000);
     } catch (error) {
       console.error("❌ Error guardando:", error);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -169,17 +221,8 @@ export const BanksPage = () => {
 
       <div style={bankPageStyles.main}>
         <Navbar />
-
         <div style={bankPageStyles.header}>
           <h1 style={bankPageStyles.title}>🏦 Cuentas Bancarias</h1>
-
-          <div style={bankPageStyles.total}>
-            💰 Saldo Total: Q{" "}
-            {total.toLocaleString("es-GT", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
-          </div>
 
           {hasChanges && (
             <div style={{ color: "#facc15", fontWeight: "bold" }}>
@@ -200,7 +243,6 @@ export const BanksPage = () => {
             style={bankPageStyles.search}
           />
         </div>
-
         <div style={bankPageStyles.tableContainer}>
           <table style={bankPageStyles.table}>
             <thead>
@@ -226,10 +268,16 @@ export const BanksPage = () => {
                   .map((acc, i) => {
                     const isEditing = editingRows[acc.number] || false;
 
-                    const displayValue =
-                      editedValues[acc.number] ??
-                      savedValues[acc.number]?.toString() ??
-                      "0";
+                    const isEdited = editedValues[acc.number] !== undefined;
+
+                    const displayValue = isEdited
+                      ? editedValues[acc.number]
+                      : acc.final !== null && acc.final !== undefined
+                        ? Number(acc.final).toLocaleString("es-GT", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })
+                        : "0.00";
 
                     return (
                       <tr key={i}>
@@ -256,20 +304,29 @@ export const BanksPage = () => {
                             }}
                             type="text"
                             value={displayValue}
-                            disabled={!isEditing}
                             style={{
                               padding: "6px",
                               borderRadius: "6px",
-                              border: isEditing
-                                ? "2px solid #22c55e"
-                                : "1px solid #334155",
-                              background: isEditing ? "#020617" : "#02061788",
+                              border:
+                                editedValues[acc.number] !== undefined
+                                  ? "2px solid #22c55e"
+                                  : "1px solid #334155",
+                              background:
+                                editedValues[acc.number] !== undefined
+                                  ? "#022c22"
+                                  : "#020617",
                               color: "white",
-                              width: "100px",
-                              textAlign: "center",
+                              width: "110px",
+                              textAlign: "right",
+                              outline: "none",
+                              transition: "all 0.2s ease",
                             }}
                             onChange={(e) => {
-                              const raw = e.target.value;
+                              let raw = e.target.value;
+
+                              // 🔥 limpiar comas para poder editar bien
+                              raw = raw.replace(/,/g, "");
+
                               const valid = validateDecimalInput(raw);
                               if (valid === null) return;
 
@@ -310,22 +367,83 @@ export const BanksPage = () => {
             ))}
           </table>
         </div>
-
         {/* 🔥 BOTÓN FLOTANTE CENTRADO */}
         <button
-          style={bankPageStyles.floatingButton}
-          onClick={handleSaveAll}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-50%) scale(1.1)";
-            e.currentTarget.style.boxShadow = "0 20px 40px rgba(0,0,0,0.7)";
+            e.currentTarget.style.transform = "translateY(-2px) scale(1.02)";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "translateY(-50%) scale(1)";
-            e.currentTarget.style.boxShadow = "0 10px 30px rgba(0,0,0,0.5)";
+            e.currentTarget.style.transform = "translateY(0px) scale(1)";
           }}
+          style={{
+            ...bankPageStyles.floatingButton,
+
+            // 🔥 estado scroll (modo glass)
+            background: isScrolling
+              ? "rgba(15,23,42,0.6)" // modo glass
+              : saving
+                ? "#f59e0b" // 🔶 NARANJA (guardando)
+                : saved
+                  ? "#f59e0b"
+                  : "#22c55e", // verde normal
+            transform: saving ? "scale(0.97)" : "scale(1)",
+            cursor: saving ? "not-allowed" : "pointer",
+            // 🔥 TEXTO dinámico
+            color: isScrolling ? "#22c55e" : "white",
+
+            // 🔥 BORDE dinámico
+            border: isScrolling
+              ? "1px solid rgba(34,197,94,0.6)"
+              : "1px solid rgba(255,255,255,0.1)",
+
+            // 🔥 SOMBRA
+            boxShadow: isScrolling
+              ? "0 4px 20px rgba(34,197,94,0.15)"
+              : saving
+                ? "0 6px 20px rgba(245,158,11,0.3)"
+                : saved
+                  ? "0 6px 20px rgba(22,163,74,0.3)"
+                  : "0 6px 20px rgba(34,197,94,0.25)",
+
+            // 🔥 OPACITY casi 100 pero suave
+            opacity: isScrolling ? 0.85 : 1,
+
+            // 🔥 EFECTO GLASS
+            backdropFilter: isScrolling ? "blur(10px)" : "blur(6px)",
+
+            transition: "all 0.3s ease",
+          }}
+          onClick={handleSaveAll}
         >
-          💾 Guardar saldos
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-start",
+            }}
+          >
+            <span style={{ fontSize: "12px", opacity: 0.8 }}>
+              {saving
+                ? "⏳ Guardando saldos..."
+                : saved
+                  ? "✅ Guardado"
+                  : "💾 Guardar saldos"}
+            </span>
+
+            <span style={{ fontSize: "18px", fontWeight: "bold" }}>
+              Q{" "}
+              {total.toLocaleString("es-GT", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </span>
+          </div>
         </button>
+        {showToast && (
+          <div style={bankPageStyles.toast}>
+            ✅ Saldos guardados correctamente
+          </div>
+        )}
       </div>
     </div>
   );

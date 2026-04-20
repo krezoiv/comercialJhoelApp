@@ -131,19 +131,90 @@ export const bankPageStyles: { [key: string]: React.CSSProperties } = {
 
   floatingButton: {
     position: "fixed",
-    right: "25px",
-    top: "15%",
-    transform: "translateY(-50%)",
-    padding: "14px 18px",
+    right: "30px",
+    top: "90px",
+    padding: "14px 20px",
     borderRadius: "12px",
+    border: "1px solid rgba(255,255,255,0.1)", // 🔥 detalle fino
+    color: "white",
+    fontWeight: "bold",
+    cursor: "pointer",
+    transition: "all 0.25s ease",
+    zIndex: 1000,
+  },
+
+  floatingTotal: {
+    position: "fixed",
+    left: "50%",
+    top: "90px",
+    transform: "translateX(-50%)",
+    background: "linear-gradient(90deg, #14532d, #166534)",
+    padding: "14px 22px",
+    borderRadius: "12px",
+    color: "white",
+    fontWeight: "bold",
+    fontSize: "16px",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+    transition: "all 0.3s ease",
+    zIndex: 998,
+  },
+
+  topBar: {
+    position: "sticky",
+    top: 0,
+    zIndex: 1000,
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "12px 20px",
+    background: "rgba(15, 23, 42, 0.85)",
+    backdropFilter: "blur(10px)",
+    borderBottom: "1px solid #1e293b",
+  },
+
+  toolbarLeft: {
+    display: "flex",
+    alignItems: "center",
+    gap: "15px",
+  },
+
+  toolbarRight: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+  },
+
+  kpi: {
+    background: "linear-gradient(90deg, #14532d, #166534)",
+    padding: "10px 18px",
+    borderRadius: "10px",
+    color: "white",
+    fontWeight: "bold",
+    fontSize: "14px",
+  },
+
+  saveButton: {
+    padding: "10px 16px",
+    borderRadius: "10px",
     border: "none",
     background: "linear-gradient(135deg, #22c55e, #16a34a)",
     color: "white",
     fontWeight: "bold",
-    fontSize: "14px",
     cursor: "pointer",
-    boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
-    zIndex: 999,
-    transition: "all 0.25s ease",
+    transition: "all 0.3s ease",
+  },
+
+  toast: {
+    position: "fixed",
+    top: "20px",
+    right: "20px",
+    background: "#22c55e",
+    color: "white",
+    padding: "12px 18px",
+    borderRadius: "10px",
+    fontWeight: "bold",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+    animation: "slideIn 0.4s ease",
+    zIndex: 9999,
   },
 };
