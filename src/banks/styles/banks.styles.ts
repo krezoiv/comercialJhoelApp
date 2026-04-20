@@ -128,4 +128,22 @@ export const bankPageStyles: { [key: string]: React.CSSProperties } = {
     cursor: "pointer",
     fontWeight: "bold",
   },
+
+  floatingButton: {
+    position: "fixed",
+    right: "25px",
+    top: "15%",
+    transform: "translateY(-50%)",
+    padding: "14px 18px",
+    borderRadius: "12px",
+    border: "none",
+    background: "linear-gradient(135deg, #22c55e, #16a34a)",
+    color: "white",
+    fontWeight: "bold",
+    fontSize: "14px",
+    cursor: "pointer",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+    zIndex: 999,
+    transition: "all 0.25s ease",
+  },
 };

@@ -1,9 +1,11 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { Navbar } from "../../dashboard/components/Navbar";
 import { Sidebar } from "../../dashboard/components/Sidebar";
 import { bankPageStyles } from "../styles/banks.styles";
 import { useBanks } from "../hooks/useBanks";
-import { validateDecimalInput } from "../../shared/utils/numberInput.util";
+import type { BankGroup } from "../interfaces/bank.interface";
+
+type Account = BankGroup["accounts"][number];
 
 export const BanksPage = () => {
   const [search, setSearch] = useState("");
@@ -13,11 +15,82 @@ export const BanksPage = () => {
   const [savedValues, setSavedValues] = useState<Record<string, number>>({});
   const [editingRows, setEditingRows] = useState<Record<string, boolean>>({});
   const [hasChanges, setHasChanges] = useState(false);
+  const [autoSaved, setAutoSaved] = useState(false);
 
   const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
-  // 🔥 AUTOSAVE (SOLO UI)
+  // 🔥 VALIDADOR
+  const validateDecimalInput = (value: string) => {
+    if (value === "") return "";
+    if (!/^\d*\.?\d*$/.test(value)) return null;
+
+    const parts = value.split(".");
+    if (parts.length > 2) return null;
+    if (parts[1] && parts[1].length > 2) return null;
+
+    return value;
+  };
+
+  // 🔥 TOTAL
+  const total = useMemo(() => {
+    return banks
+      .flatMap((b) => b.accounts)
+      .reduce((acc, item: Account) => {
+        const edited = editedValues[item.number];
+        const saved = savedValues[item.number];
+
+        const val =
+          saved !== undefined
+            ? saved
+            : edited !== undefined
+              ? Number(edited)
+              : 0;
+
+        return acc + val;
+      }, 0);
+  }, [banks, editedValues, savedValues]);
+
+  // ✏️ EDITAR
+  const handleEdit = (acc: Account) => {
+    setEditingRows((prev) => ({
+      ...prev,
+      [acc.number]: true,
+    }));
+
+    setTimeout(() => {
+      const input = inputRefs.current[acc.number];
+      if (input) input.select();
+    }, 0);
+  };
+
+  // 💾 GUARDAR
+  const handleSaveRow = (acc: Account) => {
+    const raw = editedValues[acc.number];
+    const value = raw === "" || raw === undefined ? 0 : Number(raw);
+
+    setSavedValues((prev) => ({
+      ...prev,
+      [acc.number]: value,
+    }));
+
+    setEditingRows((prev) => ({
+      ...prev,
+      [acc.number]: false,
+    }));
+
+    setEditedValues((prev) => {
+      const updated = { ...prev };
+      delete updated[acc.number];
+      return updated;
+    });
+
+    setHasChanges(false);
+  };
+
+  // 🔥 AUTOSAVE
   const handleAutoSave = useCallback(() => {
+    if (Object.keys(editedValues).length === 0) return;
+
     const converted: Record<string, number> = {};
 
     Object.keys(editedValues).forEach((key) => {
@@ -30,10 +103,19 @@ export const BanksPage = () => {
       ...converted,
     }));
 
+    setEditingRows((prev) => {
+      const updated = { ...prev };
+      Object.keys(editedValues).forEach((key) => {
+        updated[key] = false;
+      });
+      return updated;
+    });
+
     setEditedValues({});
     setHasChanges(false);
 
-    console.log("✅ Auto guardado UI");
+    setAutoSaved(true);
+    setTimeout(() => setAutoSaved(false), 2000);
   }, [editedValues]);
 
   useEffect(() => {
@@ -45,59 +127,6 @@ export const BanksPage = () => {
 
     return () => clearTimeout(timer);
   }, [editedValues, hasChanges, handleAutoSave]);
-
-  // ✏️ EDITAR
-  const handleEditRow = (accNumber: string) => {
-    setEditingRows((prev) => ({
-      ...prev,
-      [accNumber]: true,
-    }));
-
-    // focus + select
-    setTimeout(() => {
-      const input = inputRefs.current[accNumber];
-      if (input) {
-        input.focus();
-        input.select();
-      }
-    }, 0);
-  };
-
-  // 💾 GUARDAR (solo UI)
-  const handleSaveRow = (accNumber: string) => {
-    const rawValue =
-      editedValues[accNumber] ?? savedValues[accNumber]?.toString() ?? "0";
-
-    const numericValue = rawValue === "" ? 0 : Number(rawValue);
-
-    setSavedValues((prev) => ({
-      ...prev,
-      [accNumber]: numericValue,
-    }));
-
-    setEditingRows((prev) => ({
-      ...prev,
-      [accNumber]: false,
-    }));
-
-    setEditedValues((prev) => {
-      const copy = { ...prev };
-      delete copy[accNumber];
-      return copy;
-    });
-
-    setHasChanges(false);
-  };
-
-  // 💰 TOTAL DINÁMICO
-  const total = banks
-    .flatMap((b) => b.accounts)
-    .reduce((acc, item) => {
-      const value =
-        Number(editedValues[item.number]) || savedValues[item.number] || 0;
-
-      return acc + value;
-    }, 0);
 
   if (loading) return <div>Loading...</div>;
 
@@ -112,12 +141,22 @@ export const BanksPage = () => {
           <h1 style={bankPageStyles.title}>🏦 Cuentas Bancarias</h1>
 
           <div style={bankPageStyles.total}>
-            💰 Saldo Total: Q {total.toFixed(2)}
+            💰 Saldo Total: Q{" "}
+            {total.toLocaleString("es-GT", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
           </div>
 
           {hasChanges && (
             <div style={{ color: "#facc15", fontWeight: "bold" }}>
               ⚠️ Cambios sin guardar...
+            </div>
+          )}
+
+          {autoSaved && (
+            <div style={{ color: "#22c55e", fontWeight: "bold" }}>
+              ✅ Guardado automático
             </div>
           )}
 
@@ -152,20 +191,32 @@ export const BanksPage = () => {
                     acc.number.toLowerCase().includes(search.toLowerCase()),
                   )
                   .map((acc, i) => {
-                    const isEditing = editingRows[acc.number];
+                    const isEditing = editingRows[acc.number] || false;
 
-                    const displayValue = isEditing
-                      ? (editedValues[acc.number] ??
-                        (savedValues[acc.number] ?? 0).toString())
-                      : (savedValues[acc.number] ?? 0).toString();
+                    const displayValue =
+                      editedValues[acc.number] ??
+                      savedValues[acc.number]?.toString() ??
+                      "0";
 
                     return (
                       <tr key={i}>
-                        <td>{acc.name}</td>
-                        <td>{acc.number}</td>
-                        <td>Q {acc.inicial.toFixed(2)}</td>
+                        <td style={{ textAlign: "left", padding: "10px" }}>
+                          <strong>{acc.name}</strong>
+                          <br />
+                          <span style={{ fontSize: 12, color: "#94a3b8" }}>
+                            {acc.accountTypeName}
+                          </span>
+                        </td>
 
-                        <td>
+                        <td style={bankPageStyles.td}>
+                          {acc.bankAccountNumber}
+                        </td>
+
+                        <td style={bankPageStyles.td}>
+                          Q {acc.inicial.toFixed(2)}
+                        </td>
+
+                        <td style={bankPageStyles.td}>
                           <input
                             ref={(el) => {
                               inputRefs.current[acc.number] = el;
@@ -173,53 +224,47 @@ export const BanksPage = () => {
                             type="text"
                             value={displayValue}
                             disabled={!isEditing}
+                            style={{
+                              padding: "6px",
+                              borderRadius: "6px",
+                              border: isEditing
+                                ? "2px solid #22c55e"
+                                : "1px solid #334155",
+                              background: isEditing ? "#020617" : "#02061788",
+                              color: "white",
+                              width: "100px",
+                              textAlign: "center",
+                            }}
                             onChange={(e) => {
-                              const rawValue = e.target.value;
-
-                              const validValue = validateDecimalInput(
-                                rawValue,
-                                editedValues[acc.number] ?? "",
-                              );
+                              const raw = e.target.value;
+                              const valid = validateDecimalInput(raw);
+                              if (valid === null) return;
 
                               setEditedValues((prev) => ({
                                 ...prev,
-                                [acc.number]: validValue,
+                                [acc.number]: valid,
                               }));
 
                               setHasChanges(true);
                             }}
-                            onKeyDown={(e) => {
-                              if (["e", "E", "+", "-"].includes(e.key)) {
-                                e.preventDefault();
-                              }
-                            }}
-                            onPaste={(e) => {
-                              const paste = e.clipboardData.getData("text");
-                              if (!/^\d*\.?\d{0,2}$/.test(paste)) {
-                                e.preventDefault();
-                              }
-                            }}
-                            style={{
-                              ...bankPageStyles.inputBalance,
-                              border: isEditing
-                                ? "1px solid #22c55e"
-                                : "1px solid #334155",
-                            }}
                           />
                         </td>
 
-                        <td>
+                        <td style={bankPageStyles.td}>
                           {isEditing ? (
                             <button
-                              onClick={() => handleSaveRow(acc.number)}
-                              style={bankPageStyles.btnSave}
+                              style={{
+                                ...bankPageStyles.button,
+                                background: "#22c55e",
+                              }}
+                              onClick={() => handleSaveRow(acc)}
                             >
                               💾 Guardar
                             </button>
                           ) : (
                             <button
-                              onClick={() => handleEditRow(acc.number)}
-                              style={bankPageStyles.btnEdit}
+                              style={bankPageStyles.editButton}
+                              onClick={() => handleEdit(acc)}
                             >
                               ✏️ Editar
                             </button>
@@ -232,6 +277,22 @@ export const BanksPage = () => {
             ))}
           </table>
         </div>
+
+        {/* 🔥 BOTÓN FLOTANTE CENTRADO */}
+        <button
+          style={bankPageStyles.floatingButton}
+          onClick={() => console.log("Guardar saldos (pendiente)")}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "translateY(-50%) scale(1.1)";
+            e.currentTarget.style.boxShadow = "0 20px 40px rgba(0,0,0,0.7)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "translateY(-50%) scale(1)";
+            e.currentTarget.style.boxShadow = "0 10px 30px rgba(0,0,0,0.5)";
+          }}
+        >
+          💾 Guardar saldos
+        </button>
       </div>
     </div>
   );
