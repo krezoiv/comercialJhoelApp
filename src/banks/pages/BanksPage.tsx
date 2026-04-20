@@ -4,6 +4,7 @@ import { Sidebar } from "../../dashboard/components/Sidebar";
 import { bankPageStyles } from "../styles/banks.styles";
 import { useBanks } from "../hooks/useBanks";
 import type { BankGroup } from "../interfaces/bank.interface";
+import { bankService } from "../services/bank.service";
 
 type Account = BankGroup["accounts"][number];
 
@@ -129,6 +130,38 @@ export const BanksPage = () => {
   }, [editedValues, hasChanges, handleAutoSave]);
 
   if (loading) return <div>Loading...</div>;
+
+  const handleSaveAll = async () => {
+    try {
+      // 🔥 recorrer TODOS los bancos y cuentas
+      const payload = banks.flatMap((bank) =>
+        bank.accounts.map((acc) => {
+          const rawValue =
+            editedValues[acc.number] ??
+            savedValues[acc.number] ??
+            acc.final ??
+            0;
+
+          return {
+            accountNumber: acc.number,
+            finalBalance: rawValue === "" ? 0 : Number(rawValue),
+          };
+        }),
+      );
+
+      console.log("📦 Payload FINAL:", payload);
+
+      await bankService.updateFinalBalances(payload);
+
+      console.log("✅ Guardado en BD");
+
+      // 🔥 limpiar cambios
+      setEditedValues({});
+      setHasChanges(false);
+    } catch (error) {
+      console.error("❌ Error guardando:", error);
+    }
+  };
 
   return (
     <div style={bankPageStyles.layout}>
@@ -281,7 +314,7 @@ export const BanksPage = () => {
         {/* 🔥 BOTÓN FLOTANTE CENTRADO */}
         <button
           style={bankPageStyles.floatingButton}
-          onClick={() => console.log("Guardar saldos (pendiente)")}
+          onClick={handleSaveAll}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = "translateY(-50%) scale(1.1)";
             e.currentTarget.style.boxShadow = "0 20px 40px rgba(0,0,0,0.7)";

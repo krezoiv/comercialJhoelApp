@@ -16,4 +16,15 @@ export const bankService = {
     const res = await api.put("/banks-accounts/update-balances", payload);
     return res.data;
   },
+
+  // 🔥 NUEVO MÉTODO
+  updateFinalBalances: async (
+    payload: {
+      accountNumber: string;
+      finalBalance: number;
+    }[],
+  ) => {
+    const res = await api.patch("/banks-accounts/final-balance", payload);
+    return res.data;
+  },
 };
