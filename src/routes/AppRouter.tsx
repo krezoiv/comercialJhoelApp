@@ -4,6 +4,7 @@ import { AuthGuard } from "../auth/guards/AuthGuard";
 import { DashboardPage } from "../dashboard/pages/DashboardPage";
 import { BanksPage } from "../banks/pages/BanksPage";
 import { routes } from "./routes";
+import { ExpensesPage } from "../expenses/pages/ExpensesPage";
 
 export const AppRouter = () => {
   return (
@@ -25,6 +26,15 @@ export const AppRouter = () => {
           element={
             <AuthGuard>
               <BanksPage />
+            </AuthGuard>
+          }
+        />
+
+        <Route
+          path={routes.gastos}
+          element={
+            <AuthGuard>
+              <ExpensesPage />
             </AuthGuard>
           }
         />

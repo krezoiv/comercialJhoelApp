@@ -266,8 +266,6 @@ export const BanksPage = () => {
                   .map((acc, i) => {
                     const isEditing = editingRows[acc.number] || false;
 
-                    // const isEdited = editedValues[acc.number] !== undefined;
-
                     return (
                       <tr key={i}>
                         <td style={{ textAlign: "left", padding: "10px" }}>

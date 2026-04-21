@@ -45,7 +45,7 @@ export const sidebarMenu = [
       },
       {
         label: "Digitar Gastos",
-        path: "/cuadre/gatos",
+        path: "/cuadre/gastos",
         icon: NotebookPenIcon, // de lucide-react
         roles: ["admin"],
       },

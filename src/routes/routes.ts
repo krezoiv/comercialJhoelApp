@@ -3,4 +3,5 @@ export const routes = {
   dashboard: "/dashboard",
   banks: "cuadre/digitar-bancos",
   cuadre: "/cuadre",
+  gastos: "cuadre/gastos",
 };
