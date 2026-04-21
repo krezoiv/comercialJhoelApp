@@ -1,19 +1,18 @@
 export const validateDecimalInput = (
-  newValue: string,
-  prevValue: string,
-): string => {
-  // permitir vacío (para borrar)
-  if (newValue === "") return "";
+  value: string,
+  previous: string = "",
+): string | null => {
+  // Permitir vacío
+  if (value === "") return "";
 
-  // ❌ no negativos
-  if (newValue.startsWith("-")) return prevValue;
+  // Solo números y punto decimal
+  if (!/^\d*\.?\d*$/.test(value)) return null;
 
-  // 🔥 solo números y punto
-  if (!/^\d*\.?\d*$/.test(newValue)) return prevValue;
+  // Máximo 2 decimales
+  if (value.includes(".")) {
+    const [, decimals] = value.split(".");
+    if (decimals.length > 2) return previous;
+  }
 
-  // 🔥 máximo 2 decimales
-  const parts = newValue.split(".");
-  if (parts.length === 2 && parts[1].length > 2) return prevValue;
-
-  return newValue;
+  return value;
 };

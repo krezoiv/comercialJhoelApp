@@ -26,8 +26,8 @@ export const useBanks = () => {
         grouped[item.bankName].accounts.push({
           number: item.bankAccountNumber,
           name: item.bankAccountName,
-          inicial: Number(item.initialBalance),
-          final: Number(item.finalBalance),
+          inicial: Number(item.initialBalance ?? 0),
+          final: Number(item.finalBalance ?? 0),
           accountTypeName: item.accountTypeName,
           bankAccountNumber: item.bankAccountNumber,
         });

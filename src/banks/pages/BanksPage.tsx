@@ -21,6 +21,30 @@ export const BanksPage = () => {
   const [showToast, setShowToast] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
 
+  const status = saving
+    ? "saving"
+    : hasChanges
+      ? "pending"
+      : saved
+        ? "saved"
+        : "idle";
+
+  useEffect(() => {
+    if (!banks.length) return;
+
+    const initialValues: Record<string, number> = {};
+
+    banks.forEach((bank) => {
+      bank.accounts.forEach((acc) => {
+        initialValues[acc.number] = acc.final ?? 0;
+      });
+    });
+
+    setSavedValues(initialValues);
+  }, [banks]);
+  console.log("BANKS:", banks);
+  console.log("SAVED VALUES:", savedValues);
+
   useEffect(() => {
     let timeout: ReturnType<typeof setTimeout>;
 
@@ -83,52 +107,19 @@ export const BanksPage = () => {
         const saved = savedValues[item.number];
 
         const val =
-          saved !== undefined
-            ? saved
-            : edited !== undefined
-              ? Number(edited)
-              : 0;
+          edited !== undefined
+            ? Number(edited || 0)
+            : saved !== undefined
+              ? saved
+              : (item.final ?? 0);
 
         return acc + val;
       }, 0);
   }, [banks, editedValues, savedValues]);
 
   // ✏️ EDITAR
-  const handleEdit = (acc: Account) => {
-    setEditingRows((prev) => ({
-      ...prev,
-      [acc.number]: true,
-    }));
-
-    setTimeout(() => {
-      const input = inputRefs.current[acc.number];
-      if (input) input.select();
-    }, 0);
-  };
 
   // 💾 GUARDAR
-  const handleSaveRow = (acc: Account) => {
-    const raw = editedValues[acc.number];
-    const value = raw === "" || raw === undefined ? 0 : Number(raw);
-
-    setSavedValues((prev) => ({
-      ...prev,
-      [acc.number]: value,
-    }));
-
-    setEditingRows((prev) => ({
-      ...prev,
-      [acc.number]: false,
-    }));
-
-    setEditedValues((prev) => {
-      const updated = { ...prev };
-      delete updated[acc.number];
-      return updated;
-    });
-
-    setHasChanges(false);
-  };
 
   // 🔥 AUTOSAVE
   const handleAutoSave = useCallback(() => {
@@ -154,7 +145,6 @@ export const BanksPage = () => {
       return updated;
     });
 
-    setEditedValues({});
     setHasChanges(false);
 
     setAutoSaved(true);
@@ -190,19 +180,24 @@ export const BanksPage = () => {
       }
 
       await bankService.updateFinalBalances(payload);
-
-      // 🔥 REFRESH DATA (CLAVE)
-      await bankService.updateFinalBalances(payload);
-
-      // 🔥 REFRESH CORRECTO
       await refetch();
 
+      // 🔥 1. PRIMERO limpia cambios pendientes
+      setHasChanges(false);
+
+      // 🔥 2. sincroniza valores
+      setEditedValues((prev) => ({
+        ...prev,
+        ...Object.fromEntries(
+          payload.map((p) => [p.accountNumber, String(p.finalBalance)]),
+        ),
+      }));
+
+      // 🔥 3. luego marca como guardado
       setSaved(true);
       setShowToast(true);
 
-      setEditedValues({});
-      setHasChanges(false);
-
+      // 🔥 4. timers
       setTimeout(() => setSaved(false), 2000);
       setTimeout(() => setShowToast(false), 3000);
     } catch (error) {
@@ -222,7 +217,13 @@ export const BanksPage = () => {
           <h1 style={bankPageStyles.title}>🏦 Cuentas Bancarias</h1>
 
           {hasChanges && (
-            <div style={{ color: "#facc15", fontWeight: "bold" }}>
+            <div
+              style={{
+                color: "#facc15",
+                fontWeight: "bold",
+                marginBottom: "10px",
+              }}
+            >
               ⚠️ Cambios sin guardar...
             </div>
           )}
@@ -265,16 +266,7 @@ export const BanksPage = () => {
                   .map((acc, i) => {
                     const isEditing = editingRows[acc.number] || false;
 
-                    const isEdited = editedValues[acc.number] !== undefined;
-
-                    const displayValue = isEdited
-                      ? editedValues[acc.number]
-                      : acc.final !== null && acc.final !== undefined
-                        ? Number(acc.final).toLocaleString("es-GT", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })
-                        : "0.00";
+                    // const isEdited = editedValues[acc.number] !== undefined;
 
                     return (
                       <tr key={i}>
@@ -291,7 +283,11 @@ export const BanksPage = () => {
                         </td>
 
                         <td style={bankPageStyles.td}>
-                          Q {acc.inicial.toFixed(2)}
+                          Q{" "}
+                          {Number(acc.inicial ?? 0).toLocaleString("es-GT", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
                         </td>
 
                         <td style={bankPageStyles.td}>
@@ -300,7 +296,21 @@ export const BanksPage = () => {
                               inputRefs.current[acc.number] = el;
                             }}
                             type="text"
-                            value={displayValue}
+                            value={
+                              isEditing
+                                ? (editedValues[acc.number] ??
+                                  (savedValues[acc.number] !== undefined
+                                    ? String(savedValues[acc.number])
+                                    : ""))
+                                : savedValues[acc.number] !== undefined
+                                  ? `Q ${Number(
+                                      savedValues[acc.number],
+                                    ).toLocaleString("es-GT", {
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2,
+                                    })}`
+                                  : ""
+                            }
                             disabled={!isEditing}
                             style={{
                               padding: "6px",
@@ -322,7 +332,6 @@ export const BanksPage = () => {
                             onChange={(e) => {
                               let raw = e.target.value;
 
-                              // 🔥 limpiar comas para poder editar bien
                               raw = raw.replace(/,/g, "");
 
                               const valid = validateDecimalInput(raw);
@@ -339,24 +348,48 @@ export const BanksPage = () => {
                         </td>
 
                         <td style={bankPageStyles.td}>
-                          {isEditing ? (
-                            <button
-                              style={{
-                                ...bankPageStyles.button,
-                                background: "#22c55e",
-                              }}
-                              onClick={() => handleSaveRow(acc)}
-                            >
-                              💾 Guardar
-                            </button>
-                          ) : (
-                            <button
-                              style={bankPageStyles.editButton}
-                              onClick={() => handleEdit(acc)}
-                            >
-                              ✏️ Editar
-                            </button>
-                          )}
+                          <button
+                            style={
+                              editingRows[acc.number]
+                                ? bankPageStyles.btnSave
+                                : bankPageStyles.btnEdit
+                            }
+                            onClick={() => {
+                              const isEditing = editingRows[acc.number];
+
+                              // 🔥 SOLO cuando está en modo edición y va a guardar
+                              if (isEditing) {
+                                const edited = editedValues[acc.number];
+
+                                if (edited !== undefined) {
+                                  setSavedValues((prev) => ({
+                                    ...prev,
+                                    [acc.number]: Number(edited || 0),
+                                  }));
+                                }
+                              }
+
+                              setEditingRows((prev) => ({
+                                ...prev,
+                                [acc.number]: !isEditing,
+                              }));
+
+                              // 👉 SOLO cuando entra en modo edición
+                              if (!isEditing) {
+                                setTimeout(() => {
+                                  const input = inputRefs.current[acc.number];
+                                  if (input) {
+                                    input.focus();
+                                    input.select();
+                                  }
+                                }, 0);
+                              }
+                            }}
+                          >
+                            {editingRows[acc.number]
+                              ? "💾 Guardar"
+                              : "✏️ Editar"}
+                          </button>
                         </td>
                       </tr>
                     );
@@ -420,12 +453,29 @@ export const BanksPage = () => {
               alignItems: "flex-start",
             }}
           >
-            <span style={{ fontSize: "12px", opacity: 0.8 }}>
-              {saving
-                ? "⏳ Guardando saldos..."
-                : saved
-                  ? "✅ Guardado"
-                  : "💾 Guardar saldos"}
+            <span
+              style={{
+                fontSize: "12px",
+                opacity: 0.9,
+                color:
+                  status === "pending"
+                    ? "#ef4444" // 🔴 rojo
+                    : "white",
+                fontWeight: status === "pending" ? "bold" : "normal",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "12px",
+                  opacity: 0.8,
+                  color: status === "idle" ? "#f2f4f6" : "white", //
+                }}
+              >
+                {status === "saving" && "⏳ Guardando saldos..."}
+                {status === "pending" && "⚠️ Saldos pendientes"}
+                {status === "saved" && "✅ Guardado"}
+                {status === "idle" && "💾 Guardar saldos"}
+              </span>
             </span>
 
             <span style={{ fontSize: "18px", fontWeight: "bold" }}>

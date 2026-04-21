@@ -21,15 +21,19 @@ export const MoneyInput = ({
     <input
       ref={ref}
       type="text"
-      value={isEditing ? value : `Q ${formatMoney(numericValue || 0)}`}
+      value={isEditing ? value : `Q ${formatMoney(Number(numericValue || 0))}`}
       disabled={!isEditing}
       onFocus={(e) => {
-        e.target.select();
+        e.target.select(); // 🔥 selecciona todo al editar
       }}
       onChange={(e) => {
-        const raw = e.target.value;
+        let raw = e.target.value;
+
+        // 🔥 limpiar formato
+        raw = raw.replace(/[Q,\s]/g, "");
 
         const clean = validateDecimalInput(raw, value);
+        if (clean === null) return;
 
         onChange(clean);
       }}
