@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
-//import confetti from "canvas-confetti";
 import { Navbar } from "../../dashboard/components/Navbar";
 import { Sidebar } from "../../dashboard/components/Sidebar";
 import { bankPageStyles } from "../styles/banks.styles";
@@ -11,9 +10,7 @@ type Account = BankGroup["accounts"][number];
 
 export const BanksPage = () => {
   const [search, setSearch] = useState("");
-  //const { banks, loading } = useBanks();
   const { banks, loading, refetch } = useBanks();
-
   const [editedValues, setEditedValues] = useState<Record<string, string>>({});
   const [savedValues, setSavedValues] = useState<Record<string, number>>({});
   const [editingRows, setEditingRows] = useState<Record<string, boolean>>({});
@@ -304,6 +301,7 @@ export const BanksPage = () => {
                             }}
                             type="text"
                             value={displayValue}
+                            disabled={!isEditing}
                             style={{
                               padding: "6px",
                               borderRadius: "6px",
