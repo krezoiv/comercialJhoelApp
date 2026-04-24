@@ -3,7 +3,7 @@ export const expensesTableStyles = {
     width: "100%",
     borderCollapse: "collapse" as const,
     background: "#020617",
-    borderRadius: "10px",
+    borderRadius: "12px",
     overflow: "hidden",
   },
 
@@ -13,8 +13,33 @@ export const expensesTableStyles = {
   },
 
   th: {
-    padding: "10px",
-    textAlign: "left" as const,
+    padding: "14px",
+    textAlign: "center" as const, // 🔥 centrado
     fontSize: "14px",
+    fontWeight: "600",
+  },
+
+  td: {
+    padding: "14px",
+    textAlign: "center" as const, // 🔥 centrado
+    color: "white",
+    borderBottom: "1px solid #1e293b",
+  },
+
+  row: {
+    transition: "background 0.2s",
+    cursor: "default",
+  },
+
+  actions: {
+    display: "flex",
+    justifyContent: "center",
+    gap: "12px", // 🔥 separación entre botones
+  },
+
+  actionBtn: {
+    cursor: "pointer",
+    fontSize: "16px",
+    transition: "transform 0.1s",
   },
 };

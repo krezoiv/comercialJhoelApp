@@ -1,21 +1,25 @@
-import { Navbar } from "../../dashboard/components/Navbar";
-import { Sidebar } from "../../dashboard/components/Sidebar";
-
 import { useExpenses } from "../hooks/useExpenses";
 import { ExpensesTable } from "../components/ExpensesTable";
 import { ExpenseForm } from "../components/ExpenseForm";
 import { expenseService } from "../services/expense.service";
-import type { Expense } from "../interfaces/expense.interface";
+
 import { expensesPageStyles } from "../styles/expensesPage.style";
 
-export type CreateExpenseDto = Omit<Expense, "id">;
+import type { CreateExpenseDto } from "../interfaces/expense-request.interface";
+
+import { Sidebar } from "../../dashboard/components/Sidebar";
+import { Navbar } from "../../dashboard/components/Navbar";
 
 export const ExpensesPage = () => {
-  const { expenses, loading, refetch } = useExpenses();
+  const { data, loading, refetch } = useExpenses();
 
-  const handleCreate = async (data: CreateExpenseDto) => {
-    await expenseService.createExpense(data);
-    refetch();
+  const handleCreate = async (payload: CreateExpenseDto) => {
+    try {
+      await expenseService.createExpense(payload);
+      refetch();
+    } catch (error) {
+      console.error("🔥 Error creando gasto:", error);
+    }
   };
 
   if (loading) {
@@ -32,10 +36,13 @@ export const ExpensesPage = () => {
         <div style={expensesPageStyles.inner}>
           <h1 style={expensesPageStyles.title}>💸 Gastos</h1>
 
-          <ExpenseForm onSubmit={handleCreate} />
+          <div style={expensesPageStyles.card}>
+            <ExpenseForm onSubmit={handleCreate} />
+          </div>
 
-          <div style={expensesPageStyles.tableWrapper}>
-            <ExpensesTable expenses={expenses} />
+          <div style={expensesPageStyles.card}>
+            {/* ✅ usa data */}
+            <ExpensesTable data={data} />
           </div>
         </div>
       </div>

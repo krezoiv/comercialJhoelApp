@@ -1,30 +1,19 @@
 import { useEffect, useState } from "react";
 import { expenseService } from "../services/expense.service";
-import type { Expense } from "../interfaces/expense.interface";
-import type { ExpenseApiItem } from "../interfaces/expense-response.interface";
+
+import type { ExpenseCustomer } from "../interfaces/expense-customer.interface";
 
 export const useExpenses = () => {
-  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [data, setData] = useState<ExpenseCustomer[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchExpenses = async () => {
     try {
       setLoading(true);
 
-      const data = await expenseService.getExpenses();
+      const res = await expenseService.getExpensesByCustomer();
 
-      // ✅ AQUÍ ESTÁ LA SOLUCIÓN (TIPADO CORRECTO)
-      const mapped: Expense[] = data.map((e: ExpenseApiItem) => ({
-        id: e.id,
-        name: e.description,
-        client: `${e.firstName} ${e.lastName}`,
-        amount: Number(e.amount || 0),
-        type: "debit", // ⚠️ temporal porque backend no lo envía
-        entryDate: e.createdAt,
-        applyDate: e.updatedAt,
-      }));
-
-      setExpenses(mapped);
+      setData(res); // 🔥 YA NO HAY MAP
     } catch (error) {
       console.error("🔥 ERROR cargando gastos:", error);
     } finally {
@@ -37,7 +26,7 @@ export const useExpenses = () => {
   }, []);
 
   return {
-    expenses,
+    data,
     loading,
     refetch: fetchExpenses,
   };

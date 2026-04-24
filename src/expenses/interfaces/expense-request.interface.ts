@@ -6,3 +6,11 @@ export type CreateExpenseRequest = {
   entryDate: string;
   applyDate: string;
 };
+
+export interface CreateExpenseDto {
+  name: string;
+  clientId: string;
+  amount: number;
+  entryDate: string;
+  applyDate: string;
+}

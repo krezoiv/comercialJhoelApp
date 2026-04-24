@@ -10,8 +10,19 @@ import {
 } from "lucide-react";
 
 import { routes } from "../../routes/routes";
+import type { LucideIcon } from "lucide-react";
 
-export const sidebarMenu = [
+/* ✅ TIPADO CORRECTO */
+export interface SidebarItem {
+  label: string;
+  path: string;
+  icon: LucideIcon; // 🔥 importante (NO unknown)
+  roles: string[];
+  children?: SidebarItem[];
+}
+
+/* ✅ TIPADO DIRECTO DEL ARRAY */
+export const sidebarMenu: SidebarItem[] = [
   {
     label: "Dashboard",
     path: routes.dashboard,
@@ -30,35 +41,34 @@ export const sidebarMenu = [
     icon: Landmark,
     roles: ["admin"],
   },
-
   {
     label: "Finanzas",
     path: "/cuadre",
-    icon: Calculator, // de lucide-react
+    icon: Calculator,
     roles: ["admin"],
     children: [
       {
-        label: " Digitar Bancos",
+        label: "Digitar Bancos",
         path: "/cuadre/digitar-bancos",
-        icon: BadgeDollarSign, // de lucide-react
+        icon: BadgeDollarSign,
         roles: ["admin"],
       },
       {
         label: "Digitar Gastos",
         path: "/cuadre/gastos",
-        icon: NotebookPenIcon, // de lucide-react
+        icon: NotebookPenIcon,
         roles: ["admin"],
       },
       {
         label: "Digitar Depósitos Agentes",
         path: "/cuadre/depositos-agentes",
-        icon: LucideTicket, // de lucide-react
+        icon: LucideTicket,
         roles: ["admin"],
       },
       {
         label: "Cuadre General",
         path: "/cuadre/cuadre-general",
-        icon: FileSliders, // de lucide-react
+        icon: FileSliders,
         roles: ["admin"],
       },
     ],

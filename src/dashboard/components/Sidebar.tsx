@@ -1,23 +1,60 @@
-import { useNavigate, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
+
 import { sideBarStyles } from "../styles/sidebar.styles";
 import { sidebarMenu } from "./sidebar-menu";
-import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
-import { useUser } from "../../users/hooks/useUser";
+import type { SidebarItem } from "./sidebar-menu";
 
 export const Sidebar = () => {
+  const [collapsed, setCollapsed] = useState(false);
+
+  // 🔥 Persistencia submenu
+  const [openMenu, setOpenMenu] = useState<string | null>(() => {
+    return localStorage.getItem("openMenu");
+  });
+
   const navigate = useNavigate();
   const location = useLocation();
-  const { rol } = useUser();
 
-  const [collapsed, setCollapsed] = useState(false);
-  const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
+  const toggleSidebar = () => setCollapsed(!collapsed);
 
-  const toggleMenu = (label: string) => {
-    setOpenMenus((prev) => ({
-      ...prev,
-      [label]: !prev[label],
-    }));
+  const isActive = (path: string) =>
+    location.pathname === path || location.pathname.startsWith(path);
+
+  // 🔥 Mantener submenu abierto según ruta
+  useEffect(() => {
+    const currentMenu = sidebarMenu.find((item) =>
+      item.children?.some((sub) => location.pathname.startsWith(sub.path)),
+    );
+
+    const newLabel = currentMenu?.label ?? null;
+
+    // ✅ SOLO setea, sin comparar con openMenu
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setOpenMenu(newLabel);
+
+    if (newLabel) {
+      localStorage.setItem("openMenu", newLabel);
+    } else {
+      localStorage.removeItem("openMenu");
+    }
+  }, [location.pathname]);
+
+  const handleMenuClick = (item: SidebarItem) => {
+    if (item.children) {
+      const newValue = openMenu === item.label ? null : item.label;
+
+      setOpenMenu(newValue);
+
+      if (newValue) {
+        localStorage.setItem("openMenu", newValue);
+      } else {
+        localStorage.removeItem("openMenu");
+      }
+    } else {
+      navigate(item.path);
+    }
   };
 
   return (
@@ -27,58 +64,57 @@ export const Sidebar = () => {
         ...(collapsed ? sideBarStyles.sidebarCollapsed : {}),
       }}
     >
-      {/* 🔹 BOTÓN COLLAPSE */}
-      <button
-        style={sideBarStyles.toggle}
-        onClick={() => setCollapsed(!collapsed)}
-      >
+      {/* HEADER */}
+      <div style={sideBarStyles.logoContainer}>
+        <span style={sideBarStyles.logo}>📚</span>
+        {!collapsed && <span style={sideBarStyles.logoText}>Librería</span>}
+      </div>
+
+      {/* TOGGLE */}
+      <button onClick={toggleSidebar} style={sideBarStyles.toggle}>
         {collapsed ? <ChevronRight /> : <ChevronLeft />}
       </button>
 
-      {/* 🔹 LOGO */}
-      {!collapsed && (
-        <h2 style={sideBarStyles.logo}>📚 Librería</h2>
-      )}
-
-      {/* 🔹 MENU */}
-      {sidebarMenu
-        .filter((item) => item.roles.includes(rol))
-        .map((item, index) => {
+      {/* MENU */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+        {sidebarMenu.map((item) => {
           const Icon = item.icon;
-          const isActive = location.pathname === item.path;
-          const isOpen = openMenus[item.label];
+          const active = isActive(item.path);
+          const isOpen = openMenu === item.label;
 
           return (
-            <div key={index}>
+            <div key={item.label}>
               {/* 🔹 ITEM PRINCIPAL */}
               <button
+                onClick={() => handleMenuClick(item)}
                 style={{
                   ...sideBarStyles.link,
-                  ...(isActive ? sideBarStyles.linkActive : {}),
+                  ...(active ? sideBarStyles.linkActive : {}),
                 }}
-                onClick={() => {
-                  if (item.children) {
-                    toggleMenu(item.label);
-                  } else if (item.path) {
-                    navigate(item.path);
-                  }
-                }}
+                onMouseEnter={(e) =>
+                  Object.assign(e.currentTarget.style, sideBarStyles.linkHover)
+                }
+                onMouseLeave={(e) =>
+                  Object.assign(
+                    e.currentTarget.style,
+                    active ? sideBarStyles.linkActive : sideBarStyles.link,
+                  )
+                }
               >
-                <Icon size={18} style={sideBarStyles.icon} />
+                <Icon size={18} />
 
                 {!collapsed && (
                   <>
-                    <span style={sideBarStyles.label}>{item.label}</span>
+                    <span>{item.label}</span>
 
+                    {/* 🔥 FLECHA */}
                     {item.children && (
                       <ChevronDown
                         size={16}
                         style={{
                           marginLeft: "auto",
-                          transform: isOpen
-                            ? "rotate(180deg)"
-                            : "rotate(0deg)",
-                          transition: "0.2s",
+                          transition: "0.3s",
+                          transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
                         }}
                       />
                     )}
@@ -87,38 +123,56 @@ export const Sidebar = () => {
               </button>
 
               {/* 🔹 SUBMENU */}
-              {!collapsed && item.children && isOpen && (
-                <div style={sideBarStyles.submenu}>
-                  {item.children
-                    .filter((sub) => sub.roles.includes(rol))
-                    .map((sub, i) => {
-                      const SubIcon = sub.icon;
-                      const isSubActive =
-                        location.pathname === sub.path;
+              {item.children && (
+                <div
+                  style={{
+                    ...sideBarStyles.submenuContainer,
+                    maxHeight: isOpen ? "500px" : "0px",
+                  }}
+                >
+                  {item.children.map((sub) => {
+                    const SubIcon = sub.icon;
+                    const subActive = isActive(sub.path);
 
-                      return (
-                        <button
-                          key={i}
-                          style={{
-                            ...sideBarStyles.link,
-                            ...(isSubActive
-                              ? sideBarStyles.linkActive
-                              : {}),
-                            paddingLeft: "35px",
-                            fontSize: "14px",
-                          }}
-                          onClick={() => navigate(sub.path!)}
-                        >
-                          <SubIcon size={16} style={sideBarStyles.icon} />
-                          {sub.label}
-                        </button>
-                      );
-                    })}
+                    return (
+                      <button
+                        key={sub.label}
+                        onClick={() => navigate(sub.path)}
+                        style={{
+                          ...sideBarStyles.sublink,
+                          ...(subActive ? sideBarStyles.sublinkActive : {}),
+                        }}
+                        onMouseEnter={(e) =>
+                          Object.assign(
+                            e.currentTarget.style,
+                            sideBarStyles.sublinkHover,
+                          )
+                        }
+                        onMouseLeave={(e) =>
+                          Object.assign(
+                            e.currentTarget.style,
+                            subActive
+                              ? sideBarStyles.sublinkActive
+                              : sideBarStyles.sublink,
+                          )
+                        }
+                      >
+                        <SubIcon size={16} />
+                        {!collapsed && <span>{sub.label}</span>}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>
           );
         })}
+      </div>
+
+      {/* FOOTER */}
+      {!collapsed && (
+        <div style={sideBarStyles.footer}>v1.0 Sistema financiero</div>
+      )}
     </div>
   );
 };

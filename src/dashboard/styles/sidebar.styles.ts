@@ -1,29 +1,65 @@
 export const sideBarStyles: { [key: string]: React.CSSProperties } = {
   sidebar: {
-    width: "220px",
-    background: "#1e293b",
-    padding: "20px 10px",
+    width: "230px",
+    height: "100%",
+    borderRadius: "16px", // 🔥 clave
+
+    background: `
+    linear-gradient(180deg, #020617, #020617),
+    radial-gradient(circle at top left, rgba(34,197,94,0.15), transparent 40%)
+  `,
+
+    border: "1px solid rgba(255,255,255,0.05)",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+
+    padding: "15px 10px",
     display: "flex",
     flexDirection: "column",
-    transition: "width 0.3s",
+  },
+  sublink: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    padding: "10px 12px",
+    borderRadius: "10px",
+    background: "transparent",
+    border: "1px solid rgba(255,255,255,0.15)", // 👈 borde tipo botón
+    color: "#cbd5f5",
+    cursor: "pointer",
+    fontSize: "13px",
+    transition: "all 0.25s ease",
   },
 
   sidebarCollapsed: {
     width: "70px",
   },
 
-  logo: {
+  logoContainer: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
     color: "white",
+    fontWeight: "bold",
     marginBottom: "20px",
-    textAlign: "center",
+  },
+
+  logo: {
+    fontSize: "20px",
+  },
+
+  logoText: {
+    fontSize: "16px",
   },
 
   toggle: {
-    background: "transparent",
-    border: "none",
+    background: "#020617",
+    border: "1px solid #1e293b",
     color: "white",
     cursor: "pointer",
-    marginBottom: "20px",
+    borderRadius: "8px",
+    marginBottom: "15px",
+    padding: "6px",
+    transition: "0.2s",
   },
 
   link: {
@@ -31,31 +67,52 @@ export const sideBarStyles: { [key: string]: React.CSSProperties } = {
     alignItems: "center",
     gap: "10px",
     padding: "10px",
-    borderRadius: "8px",
+    borderRadius: "10px",
     background: "transparent",
     border: "none",
     color: "#cbd5f5",
     cursor: "pointer",
-    textAlign: "left",
-    transition: "all 0.2s",
+    transition: "all 0.2s ease",
   },
 
-  linkActive: {
-    background: "#3b82f6",
+  sublinkHover: {
+    background: "rgba(255,255,255,0.05)",
+    border: "1px solid #22c55e",
     color: "white",
   },
 
-  icon: {
-    minWidth: "20px",
+  sublinkActive: {
+    background: "linear-gradient(135deg, #22c55e, #16a34a)",
+    border: "1px solid transparent",
+    color: "white",
+    boxShadow: "0 0 10px rgba(34,197,94,0.4)",
   },
 
-  label: {
-    whiteSpace: "nowrap",
+  linkHover: {
+    background: "#1e293b",
+    transform: "translateX(3px)",
   },
 
-  submenu: {
+  linkActive: {
+    background: "linear-gradient(135deg, #22c55e, #16a34a)",
+    color: "white",
+    boxShadow: "0 0 12px rgba(34,197,94,0.4)",
+  },
+
+  submenuContainer: {
+    overflow: "hidden",
+    transition: "max-height 0.3s ease",
     display: "flex",
     flexDirection: "column",
-    gap: "5px",
+    gap: "4px",
+    marginLeft: "12px",
+  },
+
+  footer: {
+    marginTop: "auto",
+    color: "#64748b",
+    fontSize: "12px",
+    textAlign: "center",
+    paddingTop: "10px",
   },
 };
