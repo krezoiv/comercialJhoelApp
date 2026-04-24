@@ -13,7 +13,8 @@ export const ExpenseRow = ({ expense }: Props) => {
       <td>{expense.client}</td>
 
       <td style={expenseRowStyles.amount(expense.type)}>
-        {expense.type === "credit" ? "+" : "-"} Q {formatMoney(expense.amount)}
+        {expense.type === "credit" ? "+" : "-"} Q{" "}
+        {formatMoney(expense.amount || 0)}
       </td>
 
       <td>{expense.type === "credit" ? "Crédito" : "Débito"}</td>

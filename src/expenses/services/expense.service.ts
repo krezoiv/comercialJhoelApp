@@ -1,9 +1,13 @@
 import { api } from "../../shared/services/api";
 import type { Expense } from "../interfaces/expense.interface";
+import type {
+  ApiResponse,
+  ExpenseApiItem,
+} from "../interfaces/expense-response.interface";
 
 export const expenseService = {
-  getExpenses: async (): Promise<Expense[]> => {
-    const res = await api.get("/expenses");
+  getExpenses: async (): Promise<ExpenseApiItem[]> => {
+    const res = await api.get<ApiResponse<ExpenseApiItem[]>>("/expenses");
     return res.data.data;
   },
 

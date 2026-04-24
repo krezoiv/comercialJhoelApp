@@ -5,7 +5,6 @@ import { useExpenses } from "../hooks/useExpenses";
 import { ExpensesTable } from "../components/ExpensesTable";
 import { ExpenseForm } from "../components/ExpenseForm";
 import { expenseService } from "../services/expense.service";
-
 import type { Expense } from "../interfaces/expense.interface";
 import { expensesPageStyles } from "../styles/expensesPage.style";
 

@@ -34,6 +34,7 @@ export const ExpenseForm = ({ onSubmit }: Props) => {
       applyDate,
     });
 
+    // reset
     setName("");
     setClient("");
     setAmount("");

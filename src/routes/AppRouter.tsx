@@ -30,14 +30,7 @@ export const AppRouter = () => {
           }
         />
 
-        <Route
-          path={routes.gastos}
-          element={
-            <AuthGuard>
-              <ExpensesPage />
-            </AuthGuard>
-          }
-        />
+        <Route path={routes.gastos} element={<ExpensesPage />} />
       </Routes>
     </BrowserRouter>
   );

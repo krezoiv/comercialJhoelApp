@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { expenseService } from "../services/expense.service";
 import type { Expense } from "../interfaces/expense.interface";
+import type { ExpenseApiItem } from "../interfaces/expense-response.interface";
 
 export const useExpenses = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -10,12 +11,22 @@ export const useExpenses = () => {
     try {
       setLoading(true);
 
-      // ✅ YA VIENE TIPADO COMO Expense[]
       const data = await expenseService.getExpenses();
 
-      setExpenses(data);
+      // ✅ AQUÍ ESTÁ LA SOLUCIÓN (TIPADO CORRECTO)
+      const mapped: Expense[] = data.map((e: ExpenseApiItem) => ({
+        id: e.id,
+        name: e.description,
+        client: `${e.firstName} ${e.lastName}`,
+        amount: Number(e.amount || 0),
+        type: "debit", // ⚠️ temporal porque backend no lo envía
+        entryDate: e.createdAt,
+        applyDate: e.updatedAt,
+      }));
+
+      setExpenses(mapped);
     } catch (error) {
-      console.error("Error cargando gastos:", error);
+      console.error("🔥 ERROR cargando gastos:", error);
     } finally {
       setLoading(false);
     }
