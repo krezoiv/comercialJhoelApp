@@ -1,17 +1,4 @@
 export const bankPageStyles: { [key: string]: React.CSSProperties } = {
-  layout: {
-    display: "flex",
-    height: "100vh",
-    width: "100vw",
-    background: "#0f172a",
-  },
-
-  main: {
-    flex: 1,
-    display: "flex",
-    flexDirection: "column",
-  },
-
   header: {
     padding: "25px 30px 10px 30px",
     display: "flex",

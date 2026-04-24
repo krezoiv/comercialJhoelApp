@@ -1,10 +1,9 @@
 export const expensesPageStyles = {
   container: {
-    display: "flex",
-    background: "#020617",
     minHeight: "100vh",
+    background: "transparent", // 👈 importante
+    padding: "20px",
   },
-
   content: {
     flex: 1,
     display: "flex",

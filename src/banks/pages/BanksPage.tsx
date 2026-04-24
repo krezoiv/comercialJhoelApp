@@ -1,6 +1,4 @@
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
-import { Navbar } from "../../dashboard/components/Navbar";
-import { Sidebar } from "../../dashboard/components/Sidebar";
 import { bankPageStyles } from "../styles/banks.styles";
 import { useBanks } from "../hooks/useBanks";
 import type { BankGroup } from "../interfaces/bank.interface";
@@ -209,10 +207,7 @@ export const BanksPage = () => {
 
   return (
     <div style={bankPageStyles.layout}>
-      <Sidebar />
-
       <div style={bankPageStyles.main}>
-        <Navbar />
         <div style={bankPageStyles.header}>
           <h1 style={bankPageStyles.title}>🏦 Cuentas Bancarias</h1>
 

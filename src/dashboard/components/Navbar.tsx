@@ -14,7 +14,6 @@ export const Navbar = () => {
 
   const [openNotif, setOpenNotif] = useState(false);
 
-  // 🔔 mock (luego lo conectas a backend)
   const notifications = [
     { id: 1, text: "Nuevo gasto registrado" },
     { id: 2, text: "Cliente actualizado" },
@@ -27,19 +26,8 @@ export const Navbar = () => {
 
   return (
     <div style={navbarStyles.navbar}>
-      {/* 🔵 LEFT (LOGO + BRAND) */}
-      <div
-        style={navbarStyles.left}
-        onClick={() => navigate("/dashboard")}
-        onMouseEnter={(e) => {
-          const el = e.currentTarget.firstChild as HTMLElement;
-          el.style.transform = "scale(1.1)";
-        }}
-        onMouseLeave={(e) => {
-          const el = e.currentTarget.firstChild as HTMLElement;
-          el.style.transform = "scale(1)";
-        }}
-      >
+      {/* LEFT */}
+      <div style={navbarStyles.left} onClick={() => navigate("/dashboard")}>
         <div style={navbarStyles.logoContainer}>
           <img src={logo} alt="logo" style={navbarStyles.logo} />
           <span style={navbarStyles.logoBadge}></span>
@@ -51,7 +39,7 @@ export const Navbar = () => {
         </div>
       </div>
 
-      {/* 🔔 RIGHT */}
+      {/* RIGHT */}
       <div style={navbarStyles.right}>
         {/* NOTIFICACIONES */}
         <div style={navbarStyles.notificationContainer}>
@@ -62,12 +50,10 @@ export const Navbar = () => {
             🔔
           </span>
 
-          {/* contador */}
           <span style={navbarStyles.notificationBadge}>
             {notifications.length}
           </span>
 
-          {/* dropdown */}
           {openNotif && (
             <div style={navbarStyles.notificationDropdown}>
               {notifications.map((n) => (
@@ -79,7 +65,7 @@ export const Navbar = () => {
           )}
         </div>
 
-        {/* USER INFO */}
+        {/* USER */}
         <div style={navbarStyles.userInfo}>
           <span style={navbarStyles.userName}>{userName}</span>
           <span style={navbarStyles.rol}>{rol}</span>

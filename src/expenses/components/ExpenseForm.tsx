@@ -18,6 +18,18 @@ interface Props {
   }) => void;
 }
 
+type ApiResponse<T> = {
+  success: boolean;
+  message: string;
+  data: T;
+};
+
+type CustomerFromApi = {
+  personId: string;
+  firstName: string;
+  lastName: string;
+};
+
 export const ExpenseForm = ({ onSubmit }: Props) => {
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
@@ -25,6 +37,7 @@ export const ExpenseForm = ({ onSubmit }: Props) => {
   const [clients, setClients] = useState<Client[]>([]);
   const [search, setSearch] = useState("");
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [loadingClients, setLoadingClients] = useState(false);
 
   const [applyDate, setApplyDate] = useState("");
 
@@ -34,24 +47,44 @@ export const ExpenseForm = ({ onSubmit }: Props) => {
   // 🔍 simular búsqueda (aquí conectas tu API)
   useEffect(() => {
     const fetchClients = async () => {
-      if (!search) return;
+      if (!search.trim()) {
+        setClients([]);
+        return;
+      }
 
-      // 👉 reemplaza esto por tu API real
-      const fake = [
-        { id: "1", firstName: "Samira", lastName: "Icute" },
-        { id: "2", firstName: "Juan", lastName: "Perez" },
-      ];
+      try {
+        setLoadingClients(true);
 
-      const filtered = fake.filter((c) =>
-        `${c.firstName} ${c.lastName}`
-          .toLowerCase()
-          .includes(search.toLowerCase()),
-      );
+        const url = `http://localhost:3000/customers/search?search=${search}`;
 
-      setClients(filtered);
+        const res = await fetch(url);
+
+        // 🔥 AQUÍ VA
+        if (!res.ok) {
+          throw new Error("Error en la API");
+        }
+
+        const data: ApiResponse<CustomerFromApi[]> = await res.json();
+        setClients(
+          data.data.map((c) => ({
+            id: c.personId,
+            firstName: c.firstName,
+            lastName: c.lastName,
+          })),
+        );
+      } catch (error) {
+        console.error("Error buscando clientes:", error);
+        setClients([]);
+      } finally {
+        setLoadingClients(false);
+      }
     };
 
-    fetchClients();
+    const delayDebounce = setTimeout(() => {
+      fetchClients();
+    }, 300);
+
+    return () => clearTimeout(delayDebounce);
   }, [search]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -89,6 +122,14 @@ export const ExpenseForm = ({ onSubmit }: Props) => {
           style={expenseFormStyles.input}
         />
 
+        {/* 🔄 LOADING VA AQUÍ */}
+        {loadingClients && (
+          <div style={expenseFormStyles.dropdown}>
+            <div style={expenseFormStyles.dropdownItem}>Buscando...</div>
+          </div>
+        )}
+
+        {/* 📋 RESULTADOS */}
         {clients.length > 0 && !selectedClient && (
           <div style={expenseFormStyles.dropdown}>
             {clients.map((c) => (

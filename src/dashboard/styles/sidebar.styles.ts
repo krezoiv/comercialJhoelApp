@@ -124,14 +124,4 @@ export const sideBarStyles: { [key: string]: React.CSSProperties } = {
     gap: "4px",
     marginLeft: "12px",
   },
-  footer: {
-    marginTop: "auto",
-    color: "#64748b",
-    fontSize: "10px", // 👈 más pequeño
-    textAlign: "center",
-    paddingTop: "10px",
-    display: "flex",
-    flexDirection: "column",
-    gap: "2px",
-  },
 };

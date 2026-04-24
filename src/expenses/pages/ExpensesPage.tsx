@@ -7,9 +7,6 @@ import { expensesPageStyles } from "../styles/expensesPage.style";
 
 import type { CreateExpenseDto } from "../interfaces/expense-request.interface";
 
-import { Sidebar } from "../../dashboard/components/Sidebar";
-import { Navbar } from "../../dashboard/components/Navbar";
-
 export const ExpensesPage = () => {
   const { data, loading, refetch } = useExpenses();
 
@@ -27,24 +24,15 @@ export const ExpensesPage = () => {
   }
 
   return (
-    <div style={expensesPageStyles.container}>
-      <Sidebar />
+    <div style={expensesPageStyles.inner}>
+      <h1 style={expensesPageStyles.title}>💸 Gastos</h1>
 
-      <div style={expensesPageStyles.content}>
-        <Navbar />
+      <div style={expensesPageStyles.card}>
+        <ExpenseForm onSubmit={handleCreate} />
+      </div>
 
-        <div style={expensesPageStyles.inner}>
-          <h1 style={expensesPageStyles.title}>💸 Gastos</h1>
-
-          <div style={expensesPageStyles.card}>
-            <ExpenseForm onSubmit={handleCreate} />
-          </div>
-
-          <div style={expensesPageStyles.card}>
-            {/* ✅ usa data */}
-            <ExpensesTable data={data} />
-          </div>
-        </div>
+      <div style={expensesPageStyles.card}>
+        <ExpensesTable data={data} />
       </div>
     </div>
   );
