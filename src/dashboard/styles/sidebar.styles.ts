@@ -5,12 +5,30 @@ export const sideBarStyles: { [key: string]: React.CSSProperties } = {
     borderRadius: "16px", // 🔥 clave
 
     background: `
-    linear-gradient(180deg, #020617, #020617),
-    radial-gradient(circle at top left, rgba(34,197,94,0.15), transparent 40%)
-  `,
-
-    border: "1px solid rgba(255,255,255,0.05)",
-    boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+  linear-gradient(
+    180deg,
+    #020617 0%,
+    #020617 40%,
+    #031022 70%,
+    #020617 100%
+  ),
+  radial-gradient(
+    circle at bottom left,
+    rgba(34,197,94,0.18),
+    transparent 40%
+  ),
+  radial-gradient(
+    circle at top left,
+    rgba(59,130,246,0.12),
+    transparent 35%
+  )
+`,
+    border: "1px solid rgba(255,255,255,0.04)",
+    boxShadow: `
+  inset 0 1px 0 rgba(255,255,255,0.02),
+  0 10px 30px rgba(0,0,0,0.6)
+`,
+    backdropFilter: "blur(10px)",
 
     padding: "15px 10px",
     display: "flex",
@@ -29,7 +47,6 @@ export const sideBarStyles: { [key: string]: React.CSSProperties } = {
     fontSize: "13px",
     transition: "all 0.25s ease",
   },
-
   sidebarCollapsed: {
     width: "70px",
   },
@@ -82,7 +99,7 @@ export const sideBarStyles: { [key: string]: React.CSSProperties } = {
   },
 
   sublinkActive: {
-    background: "linear-gradient(135deg, #22c55e, #16a34a)",
+    background: "linear-gradient(135deg, #0287cf, #16a34a)",
     border: "1px solid transparent",
     color: "white",
     boxShadow: "0 0 10px rgba(34,197,94,0.4)",
@@ -107,12 +124,14 @@ export const sideBarStyles: { [key: string]: React.CSSProperties } = {
     gap: "4px",
     marginLeft: "12px",
   },
-
   footer: {
     marginTop: "auto",
     color: "#64748b",
-    fontSize: "12px",
+    fontSize: "10px", // 👈 más pequeño
     textAlign: "center",
     paddingTop: "10px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "2px",
   },
 };

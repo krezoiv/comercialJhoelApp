@@ -171,7 +171,10 @@ export const Sidebar = () => {
 
       {/* FOOTER */}
       {!collapsed && (
-        <div style={sideBarStyles.footer}>v1.0 Sistema financiero</div>
+        <div style={sideBarStyles.footer}>
+          <div>v1.0 KZI Technologies Systems</div>
+          <div>2026</div>
+        </div>
       )}
     </div>
   );
