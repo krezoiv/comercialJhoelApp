@@ -24,6 +24,7 @@ export const layoutStyles = {
     display: "flex",
     flexDirection: "column" as const,
     gap: "15px",
+    marginTop: "85px",
   },
 
   innerContent: {

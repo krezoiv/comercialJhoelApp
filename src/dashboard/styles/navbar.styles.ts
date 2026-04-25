@@ -3,17 +3,27 @@ import type { CSSProperties } from "react";
 export const navbarStyles: Record<string, CSSProperties> = {
   /* 🔥 CONTENEDOR PRINCIPAL */
   navbar: {
+    position: "fixed",
+    top: "20px",
+    left: "20px",
+    right: "20px",
+
     height: "65px",
     borderRadius: "14px",
-    background: "rgba(15,23,42,0.7)",
-    backdropFilter: "blur(10px)",
+
+    background: "rgba(15,23,42,0.75)",
+    backdropFilter: "blur(12px)",
 
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+
     padding: "0 20px",
 
     border: "1px solid rgba(255,255,255,0.05)",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+
+    zIndex: 999,
   },
 
   /* 🔵 LEFT (LOGO + BRAND) */

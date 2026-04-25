@@ -1,4 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
+
 import { useState } from "react";
 import { routes } from "../../routes/routes";
 
@@ -45,7 +46,16 @@ export const Sidebar = ({ collapsed, setCollapsed }: Props) => {
       }}
     >
       {/* LOGO */}
-      <div style={{ display: "flex", gap: "10px", color: "white" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center", // 👈 clave
+          gap: "10px",
+          color: "white",
+          height: "65px", // 👈 MISMA altura del navbar
+          paddingLeft: "5px",
+        }}
+      >
         <span>📚</span>
         {!collapsed && <strong>Librería</strong>}
       </div>
@@ -56,11 +66,41 @@ export const Sidebar = ({ collapsed, setCollapsed }: Props) => {
         style={{
           border: "none",
           background: "transparent",
-          color: "white",
           cursor: "pointer",
+          padding: "8px",
         }}
       >
-        {collapsed ? "➡️" : "⬅️"}
+        <span
+          style={{
+            display: "flex",
+            gap: "2px",
+            alignItems: "center",
+            transition: "all 0.3s ease",
+            transform: collapsed ? "rotate(180deg)" : "rotate(0deg)",
+          }}
+        >
+          <span
+            style={{
+              color: "#38bdf8",
+              textShadow: "0 0 6px rgba(56,189,248,0.8)",
+              fontSize: "14px",
+              transition: "all 0.3s",
+            }}
+          >
+            ❯
+          </span>
+
+          <span
+            style={{
+              color: "#22c55e",
+              textShadow: "0 0 8px rgba(34,197,94,0.9)",
+              fontSize: "14px",
+              transition: "all 0.3s",
+            }}
+          >
+            ❯
+          </span>
+        </span>
       </button>
 
       {/* MENÚ */}
@@ -88,45 +128,47 @@ export const Sidebar = ({ collapsed, setCollapsed }: Props) => {
       />
 
       {/* FINANZAS */}
-      <div>
-        <MenuItem
-          icon="🧾"
-          label="Finanzas"
-          collapsed={collapsed}
-          active={openFinanzas}
-          onClick={handleFinanzasClick}
-        />
+      <MenuItem
+        icon="🧾"
+        label="Finanzas"
+        collapsed={collapsed}
+        active={openFinanzas}
+        hasSubmenu
+        open={openFinanzas}
+        onClick={handleFinanzasClick}
+      />
 
-        {!collapsed && openFinanzas && (
-          <div
-            style={{
-              marginLeft: "10px",
-              display: "flex",
-              flexDirection: "column",
-              gap: "6px",
-              marginTop: "5px",
-            }}
-          >
+      {/* SUBMENU ANIMADO */}
+      <div
+        style={{
+          maxHeight: openFinanzas ? "300px" : "0px",
+          overflow: "hidden",
+          transition: "all 0.3s ease",
+          marginLeft: "10px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "6px",
+        }}
+      >
+        {!collapsed && (
+          <>
             <SubItem
               label="Digitar Bancos"
               onClick={() => handleNavigate(routes.banks)}
             />
-
             <SubItem
               label="Digitar Gastos"
               onClick={() => handleNavigate(routes.gastos)}
             />
-
             <SubItem
               label="Depósitos Agentes"
               onClick={() => alert("Pendiente")}
             />
-
             <SubItem
               label="Cuadre General"
               onClick={() => alert("Pendiente")}
             />
-          </div>
+          </>
         )}
       </div>
 
@@ -155,6 +197,8 @@ type MenuItemProps = {
   collapsed: boolean;
   active?: boolean;
   onClick?: () => void;
+  hasSubmenu?: boolean;
+  open?: boolean;
 };
 
 const MenuItem = ({
@@ -163,6 +207,8 @@ const MenuItem = ({
   collapsed,
   active,
   onClick,
+  hasSubmenu,
+  open,
 }: MenuItemProps) => (
   <div
     onClick={onClick}
@@ -170,7 +216,7 @@ const MenuItem = ({
       position: "relative",
       display: "flex",
       alignItems: "center",
-      gap: "12px",
+      justifyContent: "space-between",
       padding: "12px",
       borderRadius: "12px",
       cursor: "pointer",
@@ -188,22 +234,29 @@ const MenuItem = ({
 
       transition: "all 0.25s ease",
     }}
-    onMouseEnter={(e) => {
-      if (!active) {
-        e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-        e.currentTarget.style.transform = "translateX(4px)";
-        e.currentTarget.style.border = "1px solid rgba(255,255,255,0.15)";
-      }
-    }}
-    onMouseLeave={(e) => {
-      if (!active) {
-        e.currentTarget.style.background = "transparent";
-        e.currentTarget.style.transform = "translateX(0)";
-        e.currentTarget.style.border = "1px solid rgba(255,255,255,0.05)";
-      }
-    }}
   >
-    {/* 🔥 Glow lateral */}
+    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+      <span style={{ fontSize: "18px" }}>{icon}</span>
+      {!collapsed && <span>{label}</span>}
+    </div>
+
+    {/* FLECHA */}
+    {!collapsed && hasSubmenu && (
+      <span
+        style={{
+          transition: "all 0.3s ease",
+          transform: open ? "rotate(90deg)" : "rotate(0deg)",
+          fontSize: "18px",
+          opacity: 0.7,
+          display: "flex",
+          alignItems: "center",
+        }}
+      >
+        ❯
+      </span>
+    )}
+
+    {/* Glow lateral */}
     {active && (
       <div
         style={{
@@ -218,9 +271,6 @@ const MenuItem = ({
         }}
       />
     )}
-
-    <span style={{ fontSize: "18px" }}>{icon}</span>
-    {!collapsed && <span style={{ fontWeight: 500 }}>{label}</span>}
   </div>
 );
 

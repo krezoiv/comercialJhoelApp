@@ -3,6 +3,8 @@ export const sideBarStyles: { [key: string]: React.CSSProperties } = {
     width: "230px",
     height: "100%",
     borderRadius: "16px", // 🔥 clave
+    top: "0",
+    left: "0",
 
     background: `
   linear-gradient(
