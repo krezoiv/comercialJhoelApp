@@ -29,7 +29,7 @@ export const Sidebar = ({ collapsed, setCollapsed }: Props) => {
     <div
       style={{
         position: "fixed",
-        top: "20px",
+        top: "85px",
         left: "20px",
         bottom: "20px",
         width: collapsed ? "90px" : "240px",
@@ -182,8 +182,10 @@ export const Sidebar = ({ collapsed, setCollapsed }: Props) => {
       >
         {!collapsed && (
           <>
-            <div>v1.0 KZI</div>
-            <div>2026</div>
+            <span style={{ fontSize: "10px", opacity: 0.8 }}>
+              v1.0 KZI Technologies Systems
+            </span>
+            <span style={{ fontSize: "9px", opacity: 0.5 }}>© 2026</span>
           </>
         )}
       </div>
