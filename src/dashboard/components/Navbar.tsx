@@ -8,11 +8,17 @@ import { navbarStyles } from "../styles/navbar.styles";
 
 import logo from "../../assets/logo.png";
 
-export const Navbar = () => {
+interface Props {
+  collapsed: boolean;
+}
+
+export const Navbar = ({ collapsed }: Props) => {
   const { userName, rol } = useUser();
   const navigate = useNavigate();
 
   const [openNotif, setOpenNotif] = useState(false);
+
+  const styles = navbarStyles(collapsed); // 🔥 clave
 
   const notifications = [
     { id: 1, text: "Nuevo gasto registrado" },
@@ -25,39 +31,33 @@ export const Navbar = () => {
   };
 
   return (
-    <div style={navbarStyles.navbar}>
+    <div style={styles.navbar}>
       {/* LEFT */}
-      <div style={navbarStyles.left} onClick={() => navigate("/dashboard")}>
-        <div style={navbarStyles.logoContainer}>
-          <img src={logo} alt="logo" style={navbarStyles.logo} />
-          <span style={navbarStyles.logoBadge}></span>
+      <div style={styles.left} onClick={() => navigate("/dashboard")}>
+        <div style={styles.logoContainer}>
+          <img src={logo} alt="logo" style={styles.logo} />
+          <span style={styles.logoBadge}></span>
         </div>
 
-        <div style={navbarStyles.brand}>
-          <span style={navbarStyles.appName}>Comercial Jhoel</span>
-          <span style={navbarStyles.subtitle}>Sistema financiero</span>
+        <div style={styles.brand}>
+          <span style={styles.appName}>Comercial Jhoel</span>
+          <span style={styles.subtitle}>Sistema financiero</span>
         </div>
       </div>
 
       {/* RIGHT */}
-      <div style={navbarStyles.right}>
-        {/* NOTIFICACIONES */}
-        <div style={navbarStyles.notificationContainer}>
-          <span
-            style={navbarStyles.bell}
-            onClick={() => setOpenNotif(!openNotif)}
-          >
+      <div style={styles.right}>
+        <div style={styles.notificationContainer}>
+          <span style={styles.bell} onClick={() => setOpenNotif(!openNotif)}>
             🔔
           </span>
 
-          <span style={navbarStyles.notificationBadge}>
-            {notifications.length}
-          </span>
+          <span style={styles.notificationBadge}>{notifications.length}</span>
 
           {openNotif && (
-            <div style={navbarStyles.notificationDropdown}>
+            <div style={styles.notificationDropdown}>
               {notifications.map((n) => (
-                <div key={n.id} style={navbarStyles.notificationItem}>
+                <div key={n.id} style={styles.notificationItem}>
                   {n.text}
                 </div>
               ))}
@@ -65,14 +65,12 @@ export const Navbar = () => {
           )}
         </div>
 
-        {/* USER */}
-        <div style={navbarStyles.userInfo}>
-          <span style={navbarStyles.userName}>{userName}</span>
-          <span style={navbarStyles.rol}>{rol}</span>
+        <div style={styles.userInfo}>
+          <span style={styles.userName}>{userName}</span>
+          <span style={styles.rol}>{rol}</span>
         </div>
 
-        {/* LOGOUT */}
-        <button onClick={handleLogout} style={navbarStyles.button}>
+        <button onClick={handleLogout} style={styles.button}>
           Logout
         </button>
       </div>

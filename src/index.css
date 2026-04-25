@@ -64,3 +64,18 @@ h1, h2 {
     transform: translate(40px, -30px) scale(1.1);
   }
 }
+
+@keyframes arrowBounce {
+  0% {
+    transform: translateX(0);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateX(6px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 0.6;
+  }
+}

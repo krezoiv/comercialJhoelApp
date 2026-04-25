@@ -1,11 +1,13 @@
 import type { CSSProperties } from "react";
 
-export const navbarStyles: Record<string, CSSProperties> = {
+export const navbarStyles = (
+  collapsed: boolean,
+): Record<string, CSSProperties> => ({
   /* 🔥 CONTENEDOR PRINCIPAL */
   navbar: {
     position: "fixed",
     top: "20px",
-    left: "20px",
+    left: collapsed ? "100px" : "260px", // 🔥 dinámico
     right: "20px",
 
     height: "65px",
@@ -26,7 +28,7 @@ export const navbarStyles: Record<string, CSSProperties> = {
     zIndex: 999,
   },
 
-  /* 🔵 LEFT (LOGO + BRAND) */
+  /* 🔵 LEFT */
   left: {
     display: "flex",
     alignItems: "center",
@@ -80,14 +82,13 @@ export const navbarStyles: Record<string, CSSProperties> = {
     color: "#94a3b8",
   },
 
-  /* 🔔 RIGHT SIDE */
+  /* 🔔 RIGHT */
   right: {
     display: "flex",
     alignItems: "center",
     gap: "20px",
   },
 
-  /* 🔔 NOTIFICACIONES */
   notificationContainer: {
     position: "relative",
     cursor: "pointer",
@@ -128,7 +129,6 @@ export const navbarStyles: Record<string, CSSProperties> = {
     cursor: "pointer",
   },
 
-  /* 👤 USER INFO */
   userInfo: {
     display: "flex",
     flexDirection: "column",
@@ -144,7 +144,6 @@ export const navbarStyles: Record<string, CSSProperties> = {
     color: "#94a3b8",
   },
 
-  /* 🔴 LOGOUT BUTTON */
   button: {
     background: "#ef4444",
     border: "none",
@@ -154,4 +153,4 @@ export const navbarStyles: Record<string, CSSProperties> = {
     cursor: "pointer",
     transition: "0.2s",
   },
-};
+});

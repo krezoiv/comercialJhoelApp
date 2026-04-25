@@ -18,11 +18,16 @@ export const MainLayout = () => {
           display: "flex",
           flexDirection: "column",
 
-          marginLeft: collapsed ? "100px" : "260px", // 🔥 dinámico
+          marginLeft: collapsed ? "100px" : "260px",
+
+          paddingTop: "100px", // 🔥 CLAVE (altura navbar + margen)
+          paddingLeft: "20px",
+          paddingRight: "20px",
+
           transition: "all 0.3s ease",
         }}
       >
-        <Navbar />
+        <Navbar collapsed={collapsed} />
 
         <div style={{ padding: "20px" }}>
           <Outlet />
