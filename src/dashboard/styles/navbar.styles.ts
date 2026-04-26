@@ -6,9 +6,9 @@ export const navbarStyles = (
   /* 🔥 CONTENEDOR PRINCIPAL */
   navbar: {
     position: "fixed",
-    top: "20px",
-    left: collapsed ? "100px" : "260px", // 🔥 dinámico
-    right: "20px",
+    top: "0px",
+    left: collapsed ? "70px" : "230px", // 🔥 dinámico
+    right: "10px",
 
     height: "65px",
     borderRadius: "14px",
@@ -152,5 +152,34 @@ export const navbarStyles = (
     borderRadius: "6px",
     cursor: "pointer",
     transition: "0.2s",
+  },
+  /* 🔥 HEADER USER (INICIALES + NOMBRE) */
+  headerUserContainer: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "4px",
+    transition: "all 0.3s ease",
+  },
+
+  initials: {
+    fontFamily: "'Playfair Display', serif",
+    fontWeight: 600,
+    fontSize: "18px",
+    color: "#22c55e",
+    letterSpacing: "3px",
+    textShadow: "0 0 8px rgba(34,197,94,0.6)",
+  },
+
+  smallName: {
+    fontFamily: "'Inter', sans-serif",
+    fontSize: "10px",
+    color: "#9ca3af",
+    textAlign: "center" as const,
+    lineHeight: "12px",
+    maxWidth: "60px",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap" as const,
   },
 });

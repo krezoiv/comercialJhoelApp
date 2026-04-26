@@ -7,5 +7,7 @@ export const useUser = () => {
     user,
     userName: user?.userName,
     rol: user?.rol,
+    firstName: user?.firstName,
+    lastName: user?.lastName,
   };
 };

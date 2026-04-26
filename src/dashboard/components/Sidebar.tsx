@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-//import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 
 import { sideBarStyles } from "../styles/sidebar.styles";
 import { sidebarMenu, type SidebarItem } from "./sidebar-menu";
 import { ChevronDown } from "lucide-react";
+import { useUser } from "../../users/hooks/useUser";
 
 interface Props {
   collapsed: boolean;
@@ -12,8 +12,23 @@ interface Props {
 }
 
 export const Sidebar = ({ collapsed, setCollapsed }: Props) => {
+  const { firstName, lastName } = useUser();
   const navigate = useNavigate();
   const location = useLocation();
+  const [jumpAnim, setJumpAnim] = useState<"left" | "right" | "none">("none");
+
+  const fullName = `${firstName ?? ""} ${lastName ?? ""}`.trim();
+
+  const getInitials = (name: string) => {
+    if (!name) return "";
+
+    const parts = name.split(" ");
+    return parts
+      .slice(0, 2)
+      .map((n) => n[0])
+      .join(" ")
+      .toUpperCase();
+  };
 
   // 🔥 estado SOLO para interacción manual
   const [openMenu, setOpenMenu] = useState<string | null>(() =>
@@ -32,7 +47,6 @@ export const Sidebar = ({ collapsed, setCollapsed }: Props) => {
   const openMenuComputed = currentMenu?.label ?? openMenu;
 
   // 🔥 toggle sidebar
-  //const toggleSidebar = () => setCollapsed(!collapsed);
 
   // 🔥 click menú principal
   const handleMenuClick = (item: SidebarItem) => {
@@ -59,48 +73,92 @@ export const Sidebar = ({ collapsed, setCollapsed }: Props) => {
       }}
     >
       {/* 🔥 HEADER */}
-      <div style={sideBarStyles.logoContainer}>
-        <span style={sideBarStyles.logo}>📚</span>
-        {!collapsed && <span style={sideBarStyles.logoText}>Librería</span>}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: collapsed ? "center" : "flex-start",
+          gap: 10,
+          padding: "10px",
+        }}
+      >
+        {/* 🔵 AVATAR */}
+        <div
+          style={{
+            fontWeight: "600",
+            color: "white",
+            fontSize: collapsed ? "16px" : "18px",
+            letterSpacing: "1px",
+          }}
+        >
+          {/* 👇 SOLO mostrar iniciales cuando está colapsado */}
+          <div style={sideBarStyles.avatarContainer}>
+            <div>
+              {collapsed && (
+                <div style={sideBarStyles.avatarContainer}>
+                  {/* 🔥 Iniciales */}
+                  <div style={sideBarStyles.initials}>
+                    {getInitials(fullName)}
+                  </div>
+
+                  {/* ✨ Nombre pequeño */}
+                  <div style={sideBarStyles.fullName}>{fullName}</div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* 👇 SOLO mostrar nombre cuando NO está colapsado */}
+        {!collapsed && (
+          <div style={{ fontWeight: "bold", color: "white" }}>{fullName}</div>
+        )}
       </div>
 
-      {/* 🔥 TOGGLE */}
+      {/* TOGGLE */}
       <button
-        onClick={() => setCollapsed(!collapsed)}
+        onClick={() => {
+          const next = !collapsed;
+
+          setCollapsed(next);
+          setJumpAnim(next ? "left" : "right");
+
+          setTimeout(() => setJumpAnim("none"), 400);
+        }}
         style={{
-          border: "none",
-          background: "transparent",
-          cursor: "pointer",
-          padding: "10px",
+          ...sideBarStyles.toggleButton,
+
+          // 🔥 SOLO dinámico
+          animation:
+            jumpAnim === "left"
+              ? "jumpLeft 0.45s ease"
+              : jumpAnim === "right"
+                ? "jumpRight 0.45s ease"
+                : "none",
         }}
       >
         <span
           style={{
             display: "flex",
+            gap: "2px",
             alignItems: "center",
-            gap: "4px",
-            transform: collapsed ? "scaleX(-1)" : "scaleX(1)",
+            transition: "all 0.3s ease",
+            transform: collapsed ? "rotate(180deg)" : "rotate(0deg)",
           }}
         >
-          {/* 🔵 Flecha azul */}
           <span
             style={{
-              color: "#38bdf8",
-              textShadow: "0 0 8px rgba(56,189,248,0.8)",
-              fontSize: "16px",
-              animation: "arrowBounce 1s infinite",
-            }}
-          >
-            ❯
-          </span>
+              ...sideBarStyles.toggleInner,
 
-          {/* 🟢 Flecha verde (con delay 👇) */}
+              // 🔥 SOLO dinámico
+              transform: collapsed ? "rotate(180deg)" : "rotate(0deg)",
+            }}
+          ></span>
+          <span style={sideBarStyles.arrowBlue}>❯</span>
+
           <span
             style={{
-              color: "#22c55e",
-              textShadow: "0 0 10px rgba(34,197,94,0.9)",
-              fontSize: "16px",
-              animation: "arrowBounce 1s infinite",
+              ...sideBarStyles.arrowGreen,
               animationDelay: "0.2s",
             }}
           >
@@ -108,6 +166,7 @@ export const Sidebar = ({ collapsed, setCollapsed }: Props) => {
           </span>
         </span>
       </button>
+
       {/* 🔥 MENU */}
       {sidebarMenu.map((item) => {
         const Icon = item.icon;

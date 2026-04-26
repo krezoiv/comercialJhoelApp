@@ -79,3 +79,33 @@ h1, h2 {
     opacity: 0.6;
   }
 }
+
+@keyframes jumpRight {
+  0% {
+    transform: translateX(0) scale(1);
+  }
+  40% {
+    transform: translateX(40px) scale(1.15);
+  }
+  70% {
+    transform: translateX(55px) scale(0.95);
+  }
+  100% {
+    transform: translateX(50px) scale(1);
+  }
+}
+
+@keyframes jumpLeft {
+  0% {
+    transform: translateX(0) scale(1);
+  }
+  40% {
+    transform: translateX(-40px) scale(1.15);
+  }
+  70% {
+    transform: translateX(-55px) scale(0.95);
+  }
+  100% {
+    transform: translateX(-50px) scale(1);
+  }
+}

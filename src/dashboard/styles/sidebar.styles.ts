@@ -144,4 +144,97 @@ export const sideBarStyles: Record<string, CSSProperties> = {
     flexDirection: "column",
     gap: "2px",
   },
+
+  toggleContainer: {
+    display: "flex",
+    transition: "all 0.3s ease",
+    padding: "10px 0",
+  },
+
+  toggleButton: {
+    border: "none",
+    background: "transparent",
+    cursor: "pointer",
+    padding: "10px",
+    borderRadius: "12px",
+  },
+
+  toggleInner: {
+    display: "flex",
+    gap: "2px",
+    alignItems: "center",
+    transition: "all 0.3s ease",
+  },
+
+  arrowBlue: {
+    color: "#38bdf8",
+    textShadow: "0 0 6px rgba(56,189,248,0.8)",
+    fontSize: "14px",
+    animation: "arrowBounce 1s infinite",
+    transition: "all 0.3s",
+  },
+
+  arrowGreen: {
+    color: "#22c55e",
+    textShadow: "0 0 8px rgba(34,197,94,0.9)",
+    fontSize: "14px",
+    animation: "arrowBounce 1s infinite",
+    transition: "all 0.3s",
+  },
+  /* 🔥 HEADER USER */
+  header: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    padding: "10px",
+  },
+
+  headerCollapsed: {
+    justifyContent: "center",
+  },
+
+  headerExpanded: {
+    justifyContent: "flex-start",
+  },
+
+  avatarContainer: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "4px",
+    transition: "all 0.3s ease",
+  },
+
+  initials: {
+    fontFamily: "'Playfair Display', serif",
+    fontWeight: 600,
+    fontSize: "18px",
+    color: "#22c55e",
+    letterSpacing: "3px",
+    textShadow: "0 0 8px rgba(34,197,94,0.6)",
+  },
+
+  smallName: {
+    fontFamily: "'Inter', sans-serif",
+    fontSize: "10px",
+    color: "#9ca3af",
+    textAlign: "center" as const,
+    lineHeight: "12px",
+    maxWidth: "60px",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap" as const,
+  },
+
+  fullName: {
+    fontFamily: "'Inter', sans-serif",
+    fontSize: "5px",
+    color: "#9ca3af",
+    textAlign: "center",
+    lineHeight: "12px",
+    maxWidth: "60px", // para que no se desborde
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+  },
 };
