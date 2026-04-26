@@ -14,6 +14,7 @@ export const expenseService = {
   },
 
   createExpense: async (payload: CreateExpenseDto) => {
+    console.log("🚀 ENVIANDO AL BACKEND:", payload); // 👈 AGREGA ESTO
     const res = await api.post("/expenses", payload);
     return res.data;
   },

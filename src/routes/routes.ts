@@ -1,7 +1,8 @@
 export const routes = {
   login: "/login",
   dashboard: "/dashboard",
-  banks: "/cuadre/digitar-bancos", // ✅
+  banks: "/cuadre/digitar-bancos",
   cuadre: "/cuadre",
-  gastos: "/cuadre/gastos", // ✅
+  gastos: "/cuadre/gastos",
+  agentes: "/cuadre/agentes",
 };

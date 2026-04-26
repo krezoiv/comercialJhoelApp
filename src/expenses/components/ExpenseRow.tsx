@@ -1,5 +1,6 @@
 import { formatMoney } from "../../shared/utils/money.util";
 import type { Expense } from "../interfaces/expense.interface";
+//import type { Expense } from "../interfaces/expense.interface";
 import { expenseRowStyles } from "../styles/expenseRow.style";
 
 interface Props {

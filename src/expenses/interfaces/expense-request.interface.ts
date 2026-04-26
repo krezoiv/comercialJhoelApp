@@ -2,15 +2,14 @@ export type CreateExpenseRequest = {
   name: string;
   client: string;
   amount: number;
-  type: "credit" | "debit";
+  expenseType: string;
   entryDate: string;
   applyDate: string;
 };
 
 export interface CreateExpenseDto {
-  name: string;
-  clientId: string;
-  amount: number;
-  entryDate: string;
-  applyDate: string;
+  customerId: string;
+  expenseDescription: string;
+  expenseAmount: number;
+  expenseType: string;
 }

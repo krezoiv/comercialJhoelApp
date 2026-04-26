@@ -9,5 +9,6 @@ export const useUser = () => {
     rol: user?.rol,
     firstName: user?.firstName,
     lastName: user?.lastName,
+    userId: user?.sub || user?.userId,
   };
 };

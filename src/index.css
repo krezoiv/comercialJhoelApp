@@ -109,3 +109,60 @@ h1, h2 {
     transform: translateX(-50px) scale(1);
   }
 }
+
+/* 🔥 BACKDROP */
+@keyframes fadeInBackdrop {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 🔥 MODAL iOS */
+@keyframes iosModalIn {
+  from {
+    transform: translate(-50%, -60%) scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+/* 🔥 MODAL CLOSE (opcional después) */
+@keyframes iosModalOut {
+  from {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: translate(-50%, -60%) scale(0.95);
+    opacity: 0;
+  }
+}
+/* 🔥 TOAST ENTRADA */
+@keyframes toastIn {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* 🔥 TOAST SALIDA */
+@keyframes toastOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+}

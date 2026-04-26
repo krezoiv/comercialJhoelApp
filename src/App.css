@@ -262,6 +262,40 @@
   }
 }
 
+/* 🔥 MODAL iOS */
+@keyframes iosModalIn {
+  from {
+    transform: translate(-50%, -60%) scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+/* 🔥 MODAL CLOSE (opcional después) */
+@keyframes iosModalOut {
+  from {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: translate(-50%, -60%) scale(0.95);
+    opacity: 0;
+  }
+}
+/* 🔥 TOAST SALIDA */
+@keyframes toastOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+}
 
 
 }

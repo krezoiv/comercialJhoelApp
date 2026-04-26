@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { MoneyInput } from "../../shared/components/MoneyInput";
-import { expenseFormStyles } from "../styles/expenseform.style";
+import { expenseFormStyles } from "../../expenses/styles/expenseform.style";
 import { customerService } from "../../customers/customers.service";
 
 interface Client {
@@ -12,26 +12,38 @@ interface Client {
 interface Props {
   onSubmit: (data: {
     customerId: string;
-    expenseDescription: string;
-    expenseAmount: number;
-    expenseType: string;
+    amount: number;
+    bank: string;
+    date: string;
   }) => void;
 }
 
-export const ExpenseForm = ({ onSubmit }: Props) => {
-  const [expenseDescription, setExpenseDescription] = useState("");
-  const [expenseAmount, setExpenseAmount] = useState("");
+export const BankAgentForm = ({ onSubmit }: Props) => {
+  const [amount, setAmount] = useState("");
 
   const [clients, setClients] = useState<Client[]>([]);
   const [search, setSearch] = useState("");
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [loadingClients, setLoadingClients] = useState(false);
+  const [showErrorToast, setShowErrorToast] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const [expenseType, setExpenseType] = useState("");
+  const [bank, setBank] = useState("");
+
+  // 📅 FECHA
+  const today = new Date();
+  const minDate = today.toISOString().split("T")[0];
+
+  const max = new Date();
+  max.setDate(today.getDate() + 5);
+  const maxDate = max.toISOString().split("T")[0];
+
+  const [date, setDate] = useState(minDate);
+
   const [showConfirm, setShowConfirm] = useState(false);
   const [showToast, setShowToast] = useState(false);
 
-  const expenseTypes = ["libreria", "tienda", "copias", "impresiones"];
+  const banks = ["Banrural", "G&T", "BI", "BAC", "Promerica"];
 
   /* 🔍 BUSCAR CLIENTES */
   useEffect(() => {
@@ -65,29 +77,51 @@ export const ExpenseForm = ({ onSubmit }: Props) => {
   }, [search]);
 
   /* 💾 SUBMIT */
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleSubmit = () => {
     if (!selectedClient) return alert("Selecciona un cliente");
-    if (!expenseType) return alert("Selecciona un tipo");
-    if (!expenseDescription.trim()) return alert("Escribe descripción");
-    if (!expenseAmount || Number(expenseAmount) <= 0)
-      return alert("Monto inválido");
+    if (!bank) return alert("Selecciona un banco");
+    if (!amount || Number(amount) <= 0) return alert("Monto inválido");
+    if (!date) return alert("Selecciona una fecha");
+
+    // 🔥 VALIDACIÓN DE RANGO
+    const today = new Date();
+    const max = new Date();
+    max.setDate(today.getDate() + 5);
+
+    const selected = new Date(date + "T00:00:00");
+
+    if (selected < today || selected > max) {
+      setErrorMessage("Fecha fuera de rango permitido");
+      setShowErrorToast(true);
+
+      setTimeout(() => setShowErrorToast(false), 3000);
+
+      return;
+    }
 
     onSubmit({
       customerId: selectedClient.id,
-      expenseDescription,
-      expenseAmount: Number(expenseAmount),
-      expenseType,
+      amount: Number(amount),
+      bank,
+      date,
     });
+
+    // 🔥 TOAST
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3000);
+
+    // 🔄 RESET
+    setAmount("");
+    setBank("");
+    setSearch("");
+    setSelectedClient(null);
+    setDate(minDate);
   };
 
   return (
     <>
       <form style={expenseFormStyles.form}>
-        {/* 🔍 BUSCAR CLIENTE */}
+        {/* 🔍 CLIENTE */}
         <div style={{ position: "relative", minWidth: "220px" }}>
           <input
             placeholder="Buscar cliente..."
@@ -124,92 +158,75 @@ export const ExpenseForm = ({ onSubmit }: Props) => {
           )}
         </div>
 
-        {/* 🧩 TIPO */}
+        {/* 🏦 BANCO */}
         <select
-          value={expenseType}
-          onChange={(e) => setExpenseType(e.target.value)}
+          value={bank}
+          onChange={(e) => setBank(e.target.value)}
           style={expenseFormStyles.input}
         >
-          <option value="">Seleccionar tipo</option>
-          {expenseTypes.map((type) => (
-            <option key={type} value={type}>
-              {type.toUpperCase()}
+          <option value="">Seleccionar banco</option>
+          {banks.map((b) => (
+            <option key={b} value={b}>
+              {b.toUpperCase()}
             </option>
           ))}
         </select>
 
-        {/* 🧾 DESCRIPCIÓN */}
-        <input
-          placeholder="Descripción del gasto"
-          value={expenseDescription}
-          onChange={(e) => setExpenseDescription(e.target.value)}
-          style={{ ...expenseFormStyles.input, flex: 2 }}
-        />
-
         {/* 💰 MONTO */}
         <MoneyInput
-          value={expenseAmount}
-          numericValue={Number(expenseAmount || 0)}
+          value={amount}
+          numericValue={Number(amount || 0)}
           isEditing={true}
-          onChange={setExpenseAmount}
+          onChange={setAmount}
+        />
+
+        {/* 📅 FECHA */}
+        <input
+          type="date"
+          value={date}
+          min={minDate}
+          max={maxDate}
+          onChange={(e) => setDate(e.target.value)}
+          style={{
+            ...expenseFormStyles.input,
+            minWidth: "160px",
+            colorScheme: "dark",
+            cursor: "pointer",
+          }}
         />
 
         {/* 💾 BOTÓN */}
         <button
           type="button"
-          disabled={
-            !selectedClient ||
-            !expenseType ||
-            !expenseDescription ||
-            Number(expenseAmount) <= 0
-          }
+          disabled={!selectedClient || !bank || Number(amount) <= 0 || !date}
           style={{
             padding: "10px 18px",
             borderRadius: "12px",
             border: "none",
             background:
-              !selectedClient ||
-              !expenseType ||
-              !expenseDescription ||
-              Number(expenseAmount) <= 0
+              !selectedClient || !bank || Number(amount) <= 0 || !date
                 ? "#555"
-                : "linear-gradient(135deg, #00c853, #00e676)",
+                : "linear-gradient(135deg, #2563eb, #3b82f6)",
             color: "#fff",
             fontWeight: "bold",
-            cursor:
-              !selectedClient ||
-              !expenseType ||
-              !expenseDescription ||
-              Number(expenseAmount) <= 0
-                ? "not-allowed"
-                : "pointer",
-            boxShadow:
-              !selectedClient ||
-              !expenseType ||
-              !expenseDescription ||
-              Number(expenseAmount) <= 0
-                ? "none"
-                : "0 8px 20px rgba(0, 200, 83, 0.5)",
+            cursor: "pointer",
           }}
           onClick={() => setShowConfirm(true)}
         >
-          💾 Guardar
+          💳 Guardar
         </button>
       </form>
 
-      {/* 💎 MODAL */}
+      {/* 🔥 MODAL */}
       {showConfirm && (
         <div
           style={{
             position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
+            inset: 0,
             background: "rgba(0,0,0,0.6)",
             backdropFilter: "blur(6px)",
             zIndex: 9999,
-            animation: "fadeInBackdrop 0.25s ease",
+            animation: "fadeInBackdrop 0.3s ease",
           }}
         >
           <div
@@ -222,62 +239,39 @@ export const ExpenseForm = ({ onSubmit }: Props) => {
               padding: "25px",
               borderRadius: "20px",
               width: "350px",
-              boxShadow: "0 30px 80px rgba(0,0,0,0.9)",
-              textAlign: "center",
               color: "#fff",
-              animation: "iosModalIn 0.25s ease",
+              textAlign: "center",
+              animation: "iosModalIn 0.3s ease",
             }}
           >
-            <h3>Confirmar gasto</h3>
+            <h3>Confirmar transacción</h3>
 
-            <p style={{ fontSize: "14px", opacity: 0.8 }}>
-              ¿Deseas guardar este gasto?
-            </p>
+            <p>¿Deseas guardar este movimiento?</p>
 
-            <div style={{ marginTop: "10px", fontSize: "14px" }}>
-              <div>
-                <strong>Cliente:</strong> {selectedClient?.firstName}{" "}
-                {selectedClient?.lastName}
-              </div>
-              <div>
-                <strong>Monto:</strong> Q {Number(expenseAmount)}
-              </div>
-              <div>
-                <strong>Tipo:</strong> {expenseType}
-              </div>
+            <div style={{ marginTop: "10px" }}>
+              {selectedClient?.firstName} {selectedClient?.lastName}
             </div>
 
+            <div style={{ marginTop: "10px" }}>Banco: {bank}</div>
+
+            <div style={{ marginTop: "10px" }}>Monto: Q {amount}</div>
+
+            <div style={{ marginTop: "10px" }}>Fecha: {date}</div>
+
             <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
-              <button
-                style={{
-                  flex: 1,
-                  padding: "10px",
-                  borderRadius: "10px",
-                  border: "none",
-                  background: "#444",
-                  color: "#fff",
-                }}
-                onClick={() => setShowConfirm(false)}
-              >
-                Cancelar
-              </button>
+              <button onClick={() => setShowConfirm(false)}>Cancelar</button>
 
               <button
-                style={{
-                  flex: 1,
-                  padding: "10px",
-                  borderRadius: "10px",
-                  border: "none",
-                  background: "linear-gradient(135deg, #00c853, #00e676)",
-                  color: "#fff",
-                  fontWeight: "bold",
-                }}
                 onClick={() => {
                   setShowConfirm(false);
-
-                  handleSubmit({
-                    preventDefault: () => {},
-                  } as React.FormEvent);
+                  handleSubmit();
+                }}
+                style={{
+                  background: "#3b82f6",
+                  color: "#fff",
+                  border: "none",
+                  padding: "8px 14px",
+                  borderRadius: "10px",
                 }}
               >
                 Confirmar
@@ -294,22 +288,35 @@ export const ExpenseForm = ({ onSubmit }: Props) => {
             position: "fixed",
             top: "30px",
             right: "30px",
-            background: "linear-gradient(135deg, #00c853, #00e676)",
+            background: "linear-gradient(135deg, #2563eb, #3b82f6)",
             color: "#fff",
             padding: "14px 20px",
             borderRadius: "14px",
             boxShadow: "0 20px 40px rgba(0,0,0,0.6)",
-            fontSize: "14px",
             fontWeight: "600",
-            zIndex: 999999, // 🔥 IMPORTANTE
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            animation: "toastIn 0.30s ease",
+            zIndex: 999999,
+            animation: "toastIn 0.3s ease",
           }}
         >
-          <span style={{ fontSize: "18px" }}>✅</span>
-          Gasto guardado exitosamente
+          💳 Transacción guardada
+        </div>
+      )}
+      {showErrorToast && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: "30px",
+            right: "30px",
+            background: "#ef4444",
+            color: "#fff",
+            padding: "14px 20px",
+            borderRadius: "14px",
+            boxShadow: "0 20px 40px rgba(0,0,0,0.6)",
+            fontWeight: "600",
+            zIndex: 999999,
+          }}
+        >
+          ❌ {errorMessage}
         </div>
       )}
     </>
