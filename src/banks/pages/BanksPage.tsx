@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { bankPageStyles } from "../styles/banks.styles";
 import { useBanks } from "../hooks/useBanks";
-import type { BankGroup } from "../interfaces/bank.interface";
+import type { BankGroup } from "../interfaces/bank-group.interface";
 import { bankService } from "../services/bank.service";
 
 type Account = BankGroup["accounts"][number];

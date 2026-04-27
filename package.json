@@ -12,7 +12,7 @@
   "dependencies": {
     "@casl/ability": "^6.8.0",
     "@types/react-router-dom": "^5.3.3",
-    "axios": "^1.15.0",
+    "axios": "^1.15.2",
     "canvas-confetti": "^1.9.4",
     "lucide-react": "^1.11.0",
     "react": "^19.2.4",

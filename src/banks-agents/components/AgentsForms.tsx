@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { MoneyInput } from "../../shared/components/MoneyInput";
 import { expenseFormStyles } from "../../expenses/styles/expenseform.style";
 import { customerService } from "../../customers/customers.service";
+import type { Bank } from "../../banks/interfaces/bank.interface";
+import { bankService } from "../../banks/services/bank.service";
+import { useUser } from "../../users/hooks/useUser";
 
 interface Client {
   id: string;
@@ -13,22 +16,27 @@ interface Props {
   onSubmit: (data: {
     customerId: string;
     amount: number;
-    bank: string;
-    date: string;
+    bankId: string;
+    description: string;
+    userId: string;
+    paymentDate: string;
   }) => void;
+
+  errorMessage?: string | null; // ✅ AQUÍ SÍ VA
 }
 
-export const BankAgentForm = ({ onSubmit }: Props) => {
+export const BankAgentForm = ({ onSubmit, errorMessage }: Props) => {
+  const { userId } = useUser();
   const [amount, setAmount] = useState("");
+  const [banks, setBanks] = useState<Bank[]>([]);
+  const [selectedBank, setSelectedBank] = useState("");
 
   const [clients, setClients] = useState<Client[]>([]);
   const [search, setSearch] = useState("");
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [loadingClients, setLoadingClients] = useState(false);
-  const [showErrorToast, setShowErrorToast] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
 
-  const [bank, setBank] = useState("");
+  const [bank] = useState("");
 
   // 📅 FECHA
   const today = new Date();
@@ -41,9 +49,8 @@ export const BankAgentForm = ({ onSubmit }: Props) => {
   const [date, setDate] = useState(minDate);
 
   const [showConfirm, setShowConfirm] = useState(false);
-  const [showToast, setShowToast] = useState(false);
-
-  const banks = ["Banrural", "G&T", "BI", "BAC", "Promerica"];
+  const [showToast] = useState(false);
+  const [description, setDescription] = useState("");
 
   /* 🔍 BUSCAR CLIENTES */
   useEffect(() => {
@@ -77,47 +84,60 @@ export const BankAgentForm = ({ onSubmit }: Props) => {
   }, [search]);
 
   /* 💾 SUBMIT */
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!selectedClient) return alert("Selecciona un cliente");
-    if (!bank) return alert("Selecciona un banco");
+    if (!selectedBank) return alert("Selecciona un banco");
     if (!amount || Number(amount) <= 0) return alert("Monto inválido");
     if (!date) return alert("Selecciona una fecha");
 
     // 🔥 VALIDACIÓN DE RANGO
     const today = new Date();
-    const max = new Date();
-    max.setDate(today.getDate() + 5);
+    today.setHours(0, 0, 0, 0);
+
+    const max = new Date(today);
+    max.setDate(max.getDate() + 5);
 
     const selected = new Date(date + "T00:00:00");
+    selected.setHours(0, 0, 0, 0);
 
-    if (selected < today || selected > max) {
-      setErrorMessage("Fecha fuera de rango permitido");
-      setShowErrorToast(true);
+    // 🔥 SUBMIT CORRECTO
+    try {
+      await onSubmit({
+        customerId: selectedClient.id,
+        bankId: selectedBank,
+        userId: userId,
+        amount: Number(amount),
+        description,
+        paymentDate: date,
+      });
 
-      setTimeout(() => setShowErrorToast(false), 3000);
+      // ✅ SOLO SI TODO SALE BIEN
 
-      return;
+      // 🔄 RESET SOLO EN ÉXITO
+      setAmount("");
+      setSelectedBank("");
+      setSearch("");
+      setSelectedClient(null);
+      setDate("");
+      setDescription("");
+    } catch (error) {
+      console.error(error);
+      // ❌ NO HAGAS NADA AQUÍ (el padre ya maneja el error)
     }
-
-    onSubmit({
-      customerId: selectedClient.id,
-      amount: Number(amount),
-      bank,
-      date,
-    });
-
-    // 🔥 TOAST
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
-
-    // 🔄 RESET
-    setAmount("");
-    setBank("");
-    setSearch("");
-    setSelectedClient(null);
-    setDate(minDate);
   };
 
+  useEffect(() => {
+    const fetchBanks = async () => {
+      try {
+        const data = await bankService.getBanks();
+        setBanks(data);
+      } catch (error) {
+        console.error("Error cargando bancos:", error);
+      }
+    };
+
+    fetchBanks();
+  }, []);
   return (
     <>
       <form style={expenseFormStyles.form}>
@@ -160,14 +180,15 @@ export const BankAgentForm = ({ onSubmit }: Props) => {
 
         {/* 🏦 BANCO */}
         <select
-          value={bank}
-          onChange={(e) => setBank(e.target.value)}
+          value={selectedBank}
+          onChange={(e) => setSelectedBank(e.target.value)}
           style={expenseFormStyles.input}
         >
           <option value="">Seleccionar banco</option>
+
           {banks.map((b) => (
-            <option key={b} value={b}>
-              {b.toUpperCase()}
+            <option key={b.id} value={b.id}>
+              {b.bankName}
             </option>
           ))}
         </select>
@@ -179,41 +200,95 @@ export const BankAgentForm = ({ onSubmit }: Props) => {
           isEditing={true}
           onChange={setAmount}
         />
-
-        {/* 📅 FECHA */}
         <input
-          type="date"
-          value={date}
-          min={minDate}
-          max={maxDate}
-          onChange={(e) => setDate(e.target.value)}
-          style={{
-            ...expenseFormStyles.input,
-            minWidth: "160px",
-            colorScheme: "dark",
-            cursor: "pointer",
-          }}
+          placeholder="Descripción"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          style={expenseFormStyles.input}
         />
+
+        <div
+          style={{
+            position: "relative",
+            display: "flex",
+            alignItems: "center",
+            background: "#0b1220",
+            border: "1px solid #1f2a44",
+            borderRadius: "10px",
+            padding: "0 12px",
+            height: "42px",
+            minWidth: "160px",
+          }}
+        >
+          {/* ICONO */}
+          <span
+            style={{
+              color: "#4facfe",
+              fontSize: "16px",
+              marginRight: "8px",
+              pointerEvents: "none",
+            }}
+          >
+            📅
+          </span>
+
+          {/* INPUT REAL (datepicker) */}
+          <input
+            type="date"
+            value={date}
+            min={minDate}
+            max={maxDate}
+            onChange={(e) => setDate(e.target.value)}
+            style={{
+              background: "transparent",
+              border: "none",
+              color: "#fff",
+              outline: "none",
+              fontSize: "14px",
+              width: "100%",
+              cursor: "pointer",
+            }}
+          />
+
+          {/* ESTILOS PARA ICONO NATIVO */}
+          <style>
+            {`
+      input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+        cursor: pointer;
+      }
+    `}
+          </style>
+        </div>
 
         {/* 💾 BOTÓN */}
         <button
-          type="button"
-          disabled={!selectedClient || !bank || Number(amount) <= 0 || !date}
+          onClick={handleSubmit}
           style={{
-            padding: "10px 18px",
-            borderRadius: "12px",
+            background: "linear-gradient(135deg, #4facfe, #00f2fe)",
             border: "none",
-            background:
-              !selectedClient || !bank || Number(amount) <= 0 || !date
-                ? "#555"
-                : "linear-gradient(135deg, #2563eb, #3b82f6)",
             color: "#fff",
+            padding: "12px 20px",
+            borderRadius: "10px",
             fontWeight: "bold",
+            fontSize: "14px",
             cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
+            transition: "all 0.2s ease",
           }}
-          onClick={() => setShowConfirm(true)}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "scale(1.05)";
+            e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,0,0,0.3)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "scale(1)";
+            e.currentTarget.style.boxShadow = "0 4px 15px rgba(0,0,0,0.2)";
+          }}
         >
-          💳 Guardar
+          💾 Guardar
         </button>
       </form>
 
@@ -298,25 +373,22 @@ export const BankAgentForm = ({ onSubmit }: Props) => {
             animation: "toastIn 0.3s ease",
           }}
         >
-          💳 Transacción guardada
+          💳 Transacción guardada -----
         </div>
       )}
-      {showErrorToast && (
+      {errorMessage && (
         <div
           style={{
-            position: "fixed",
-            bottom: "30px",
-            right: "30px",
-            background: "#ef4444",
-            color: "#fff",
-            padding: "14px 20px",
-            borderRadius: "14px",
-            boxShadow: "0 20px 40px rgba(0,0,0,0.6)",
-            fontWeight: "600",
-            zIndex: 999999,
+            background: "#ff4d4f",
+            color: "white",
+            padding: "10px",
+            borderRadius: "6px",
+            marginTop: "10px",
+            fontWeight: "bold",
+            textAlign: "center",
           }}
         >
-          ❌ {errorMessage}
+          {errorMessage}
         </div>
       )}
     </>

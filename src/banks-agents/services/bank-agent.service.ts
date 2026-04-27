@@ -1,28 +1,18 @@
 import { api } from "../../shared/services/api";
 
-type ApiResponse<T> = {
-  success: boolean;
-  message: string;
-  data: T;
-};
-
-import type { BankAgent } from "../interfaces/bank-agent.interface";
-
 export const bankAgentService = {
-  getBankAgents: async (): Promise<BankAgent[]> => {
-    const res = await api.get<ApiResponse<BankAgent[]>>(
-      "/bank-agents/bank-agents-customer",
-    );
-
-    return res.data.data;
-  },
-
   createBankAgent: async (payload: {
     customerId: string;
+    bankId: string;
+    userId: string;
     amount: number;
-    bank: string;
+    description: string;
+    paymentDate: string;
   }) => {
-    const res = await api.post("/bank-agents", payload);
+    const res = await api.post("/bankAgents", payload);
+
+    console.log("📦 RESPUESTA:", res.data);
+
     return res.data;
   },
 };

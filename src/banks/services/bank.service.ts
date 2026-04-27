@@ -1,6 +1,10 @@
 import { api } from "../../shared/services/api";
 
 export const bankService = {
+  getBanks: async () => {
+    const res = await api.get("/banks");
+    return res.data.data;
+  },
   getBankAccounts: async () => {
     const res = await api.get("/banks-accounts");
     return res.data.data;

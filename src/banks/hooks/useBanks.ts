@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { bankService } from "../services/bank.service";
-import type { BankGroup } from "../interfaces/bank.interface"; // 🔥 FIX
+import type { BankGroup } from "../interfaces/bank-group.interface"; // 🔥 FIX
 import type { BankApiResponse } from "../interfaces/bank-api-response";
 export const useBanks = () => {
   const [banks, setBanks] = useState<BankGroup[]>([]);
