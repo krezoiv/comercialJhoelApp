@@ -31,7 +31,7 @@ export const BankAgentsTable = ({ data }: Props) => {
               {c.firstName} {c.lastName}
             </td>
 
-            <td style={expensesTableStyles.td}>{c.totalTransactions}</td>
+            <td style={expensesTableStyles.td}>{c.totalBankAgent}</td>
 
             <td style={expensesTableStyles.td}>
               Q {Number(c.totalAmount).toFixed(2)}

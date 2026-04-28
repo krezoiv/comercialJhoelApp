@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { bankAgentService } from "../services/bank-agent.service";
 import type { BankAgent } from "../interfaces/bank-agent.interface";
 
 export const useBankAgents = () => {
@@ -9,7 +10,9 @@ export const useBankAgents = () => {
     try {
       setLoading(true);
 
-      setData(res);
+      const res = await bankAgentService.getBankAgentsByCustomers();
+
+      setData(res); // 👈 ya viene limpio
     } catch (error) {
       console.error("🔥 ERROR cargando agentes:", error);
     } finally {

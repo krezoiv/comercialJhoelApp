@@ -15,4 +15,13 @@ export const bankAgentService = {
 
     return res.data;
   },
+
+  // 🔥 ESTE ES EL QUE TE FALTABA
+  getBankAgentsByCustomers: async () => {
+    const res = await api.get("/bankAgents/bankAgents-customers");
+
+    console.log("📊 DATA GET:", res.data);
+
+    return res.data.data; // 👈 IMPORTANTE (porque tu backend envuelve en data)
+  },
 };
