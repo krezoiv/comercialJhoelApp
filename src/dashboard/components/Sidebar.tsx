@@ -1,24 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-
+import { useUser } from "../../users/hooks/useUser";
 import { sideBarStyles } from "../styles/sidebar.styles";
 import { sidebarMenu, type SidebarItem } from "./sidebar-menu";
 import { ChevronDown } from "lucide-react";
-import { useUser } from "../../users/hooks/useUser";
 
-interface Props {
+type Props = {
   collapsed: boolean;
   setCollapsed: (value: boolean) => void;
-}
+};
 
 export const Sidebar = ({ collapsed, setCollapsed }: Props) => {
   const { firstName, lastName } = useUser();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const initializedRef = useRef(false);
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [jumpAnim, setJumpAnim] = useState<"left" | "right" | "none">("none");
-
   const fullName = `${firstName ?? ""} ${lastName ?? ""}`.trim();
-
   const getInitials = (name: string) => {
     if (!name) return "";
 
@@ -29,26 +26,30 @@ export const Sidebar = ({ collapsed, setCollapsed }: Props) => {
       .join(" ")
       .toUpperCase();
   };
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  // 🔥 estado SOLO para interacción manual
-  const [openMenu, setOpenMenu] = useState<string | null>(() =>
-    localStorage.getItem("openMenu"),
+  /* 🔥 DETECTAR MENÚ ACTIVO POR RUTA */
+  const currentMenu = sidebarMenu.find((item) =>
+    item.children?.some((sub) => location.pathname.startsWith(sub.path)),
   );
+
+  /* 🔥 SINCRONIZAR SOLO UNA VEZ */
+  useEffect(() => {
+    if (!initializedRef.current && currentMenu) {
+      setTimeout(() => {
+        setOpenMenu(currentMenu.label);
+        initializedRef.current = true;
+      }, 0);
+    }
+  }, [currentMenu]);
 
   // 🔥 detectar activo
   const isActive = (path: string) =>
     location.pathname === path || location.pathname.startsWith(path + "/");
 
-  // 🔥 detectar automáticamente el menú según ruta (SIN useEffect)
-  const currentMenu = sidebarMenu.find((item) =>
-    item.children?.some((sub) => location.pathname.startsWith(sub.path)),
-  );
+  /* 🔥 TOGGLE */
 
-  const openMenuComputed = currentMenu?.label ?? openMenu;
-
-  // 🔥 toggle sidebar
-
-  // 🔥 click menú principal
   const handleMenuClick = (item: SidebarItem) => {
     if (item.children) {
       const newValue = openMenu === item.label ? null : item.label;
@@ -108,8 +109,6 @@ export const Sidebar = ({ collapsed, setCollapsed }: Props) => {
             </div>
           </div>
         </div>
-
-        {/* 👇 SOLO mostrar nombre cuando NO está colapsado */}
         {!collapsed && (
           <div style={{ fontWeight: "bold", color: "white" }}>{fullName}</div>
         )}
@@ -167,15 +166,16 @@ export const Sidebar = ({ collapsed, setCollapsed }: Props) => {
         </span>
       </button>
 
-      {/* 🔥 MENU */}
+      {/* 🔥 MENÚ */}
       {sidebarMenu.map((item) => {
         const Icon = item.icon;
         const active = isActive(item.path);
-        const isOpen = openMenuComputed === item.label;
+
+        const isOpen = openMenu === item.label;
 
         return (
           <div key={item.label}>
-            {/* 🔥 MENU PRINCIPAL */}
+            {/* 🔥 ITEM PRINCIPAL */}
             <button
               onClick={() => handleMenuClick(item)}
               style={{
@@ -201,28 +201,29 @@ export const Sidebar = ({ collapsed, setCollapsed }: Props) => {
             </button>
 
             {/* 🔥 SUBMENU */}
-            {!collapsed && item.children && (
+            {item.children && (
               <div
                 style={{
                   ...sideBarStyles.submenuContainer,
                   maxHeight: isOpen ? "500px" : "0px",
+                  opacity: isOpen ? 1 : 0,
+                  transition: "max-height 0.35s ease, opacity 0.2s",
                 }}
               >
                 {item.children.map((sub) => {
-                  const SubIcon = sub.icon;
-                  const subActive = isActive(sub.path);
+                  const isSubActive = location.pathname === sub.path;
 
                   return (
                     <button
-                      key={sub.label}
-                      onClick={() => navigate(sub.path)}
+                      key={sub.label + sub.path}
                       style={{
                         ...sideBarStyles.sublink,
-                        ...(subActive ? sideBarStyles.sublinkActive : {}),
+                        ...(isSubActive ? sideBarStyles.sublinkActive : {}),
                       }}
+                      onClick={() => navigate(sub.path)}
                     >
-                      <SubIcon size={16} />
-                      <span>{sub.label}</span>
+                      <sub.icon size={16} />
+                      {!collapsed && <span>{sub.label}</span>}
                     </button>
                   );
                 })}
@@ -233,16 +234,10 @@ export const Sidebar = ({ collapsed, setCollapsed }: Props) => {
       })}
 
       {/* 🔥 FOOTER */}
-      {!collapsed && (
-        <div style={sideBarStyles.footer}>
-          <span style={{ display: "block", fontSize: "11px" }}>
-            v1.0 KZI Technologies Systems
-          </span>
-          <span style={{ display: "block", fontSize: "10px", opacity: 0.7 }}>
-            2026
-          </span>
-        </div>
-      )}
+      <div style={sideBarStyles.footer}>
+        <span>KZi Technologies</span>
+        <span>v1.0.0</span>
+      </div>
     </div>
   );
 };

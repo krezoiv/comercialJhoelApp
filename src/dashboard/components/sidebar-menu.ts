@@ -1,12 +1,12 @@
 import {
   LayoutDashboard,
-  Users,
   Landmark,
   Calculator,
   NotebookPenIcon,
   BadgeDollarSign,
   LucideTicket,
   FileSliders,
+  Settings,
 } from "lucide-react";
 
 import { routes } from "../../routes/routes";
@@ -29,12 +29,7 @@ export const sidebarMenu: SidebarItem[] = [
     icon: LayoutDashboard,
     roles: ["admin", "user"],
   },
-  {
-    label: "Usuarios",
-    path: "#",
-    icon: Users,
-    roles: ["admin"],
-  },
+
   {
     label: "Bancos",
     path: routes.banks,
@@ -78,5 +73,11 @@ export const sidebarMenu: SidebarItem[] = [
         roles: ["admin"],
       },
     ],
+  },
+  {
+    label: "Ajustes",
+    path: "#",
+    icon: Settings,
+    roles: ["admin"],
   },
 ];
