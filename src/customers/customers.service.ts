@@ -19,6 +19,20 @@ type CustomerFromApi = {
   lastName: string;
 };
 
+export type CustomerStats = {
+  customerId: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email: string;
+
+  totalExpenses: number;
+  totalExpensesAmount: string;
+
+  totalBankAgent: number;
+  totalBankAgentAmount: string;
+};
+
 export const customerService = {
   searchCustomers: async (search: string): Promise<Customer[]> => {
     const res = await api.get<ApiResponse<CustomerFromApi[]>>(
@@ -34,5 +48,13 @@ export const customerService = {
   createClient: async (data: CreateCustomerRequest) => {
     const response = await api.post("/customers", data);
     return response.data;
+  },
+
+  getCustomerStats: async (): Promise<CustomerStats[]> => {
+    const res = await api.get<ApiResponse<CustomerStats[]>>(
+      "/customers/customer-stats",
+    );
+
+    return res.data.data;
   },
 };

@@ -2,8 +2,11 @@ import { useState, type ChangeEvent } from "react";
 import { useCustomers } from "../hooks/useClients";
 import { customerFormStyles as styles } from "../styles/customerForm.style";
 import { ConfirmModal } from "../../shared/utils/ConfirmModal";
+type Props = {
+  onSuccess: () => void;
+};
 
-export const CustomerForm = () => {
+export const CustomerForm = ({ onSuccess }: Props) => {
   const { createCustomer, loading } = useCustomers();
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -27,6 +30,8 @@ export const CustomerForm = () => {
   const handleSubmit = async () => {
     try {
       await createCustomer(form);
+
+      onSuccess();
 
       setShowConfirm(false);
 

@@ -1,33 +1,30 @@
-import React from "react";
+import type { CSSProperties } from "react";
 
 interface Props {
   isOpen: boolean;
-  title?: string;
   message: string;
   onConfirm: () => void;
   onCancel: () => void;
 }
 
-export const ConfirmModal: React.FC<Props> = ({
+export const ConfirmModal = ({
   isOpen,
-  title = "Confirmar",
   message,
   onConfirm,
   onCancel,
-}) => {
+}: Props) => {
   if (!isOpen) return null;
 
   return (
     <div style={styles.overlay}>
       <div style={styles.modal}>
-        <h3>{title}</h3>
         <p>{message}</p>
 
         <div style={styles.actions}>
-          <button onClick={onCancel} style={styles.cancel}>
+          <button style={styles.cancelBtn} onClick={onCancel}>
             Cancelar
           </button>
-          <button onClick={onConfirm} style={styles.confirm}>
+          <button style={styles.confirmBtn} onClick={onConfirm}>
             Guardar
           </button>
         </div>
@@ -36,42 +33,52 @@ export const ConfirmModal: React.FC<Props> = ({
   );
 };
 
-const styles = {
+const styles: Record<string, CSSProperties> = {
   overlay: {
-    position: "fixed" as const,
+    position: "fixed",
     top: 0,
     left: 0,
-    width: "100%",
-    height: "100%",
-    background: "rgba(0,0,0,0.5)",
+    width: "100vw",
+    height: "100vh",
+    background: "rgba(0,0,0,0.6)",
+    backdropFilter: "blur(6px)",
     display: "flex",
-    justifyContent: "center",
     alignItems: "center",
+    justifyContent: "center",
+    zIndex: 9999,
   },
+
   modal: {
     background: "#0f172a",
-    padding: "20px",
+    padding: "24px",
     borderRadius: "12px",
-    width: "300px",
+    minWidth: "320px",
     color: "white",
+    textAlign: "center",
   },
+
   actions: {
-    marginTop: "20px",
+    marginTop: "16px",
     display: "flex",
     justifyContent: "space-between",
+    gap: "10px",
   },
-  cancel: {
+
+  cancelBtn: {
     background: "#64748b",
-    color: "white",
+    border: "none",
     padding: "8px 12px",
     borderRadius: "6px",
-    border: "none",
+    cursor: "pointer",
+    color: "white",
   },
-  confirm: {
+
+  confirmBtn: {
     background: "#22c55e",
-    color: "white",
+    border: "none",
     padding: "8px 12px",
     borderRadius: "6px",
-    border: "none",
+    cursor: "pointer",
+    color: "white",
   },
 };
