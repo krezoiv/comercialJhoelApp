@@ -1,4 +1,5 @@
 import { api } from "../shared/services/api";
+import type { CreateCustomerRequest } from "./interfaces/customer-request.interface";
 
 type ApiResponse<T> = {
   success: boolean;
@@ -29,5 +30,9 @@ export const customerService = {
       firstName: c.firstName,
       lastName: c.lastName,
     }));
+  },
+  createClient: async (data: CreateCustomerRequest) => {
+    const response = await api.post("/customers", data);
+    return response.data;
   },
 };

@@ -5,4 +5,5 @@ export const routes = {
   cuadre: "/cuadre",
   gastos: "/cuadre/gastos",
   agentes: "/cuadre/agentes",
+  clientes: "/ajustes/clientes",
 };

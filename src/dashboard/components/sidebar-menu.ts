@@ -7,6 +7,7 @@ import {
   LucideTicket,
   FileSliders,
   Settings,
+  User2,
 } from "lucide-react";
 
 import { routes } from "../../routes/routes";
@@ -32,7 +33,7 @@ export const sidebarMenu: SidebarItem[] = [
 
   {
     label: "Bancos",
-    path: routes.banks,
+    path: "#",
     icon: Landmark,
     roles: ["admin"],
   },
@@ -79,5 +80,19 @@ export const sidebarMenu: SidebarItem[] = [
     path: "#",
     icon: Settings,
     roles: ["admin"],
+    children: [
+      {
+        label: "Clientes",
+        path: "/ajustes/clientes",
+        icon: User2,
+        roles: ["admin"],
+      },
+      {
+        label: "Bancos",
+        path: "#",
+        icon: BadgeDollarSign,
+        roles: ["admin"],
+      },
+    ],
   },
 ];

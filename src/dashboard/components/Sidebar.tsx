@@ -23,7 +23,7 @@ export const Sidebar = ({ collapsed, setCollapsed }: Props) => {
     return parts
       .slice(0, 2)
       .map((n) => n[0])
-      .join(" ")
+      .join("")
       .toUpperCase();
   };
   const location = useLocation();
@@ -234,10 +234,17 @@ export const Sidebar = ({ collapsed, setCollapsed }: Props) => {
       })}
 
       {/* 🔥 FOOTER */}
-      <div style={sideBarStyles.footer}>
-        <span>KZi Technologies</span>
-        <span>v1.0.0</span>
-      </div>
+      {/* 🔥 FOOTER */}
+      {!collapsed && (
+        <div style={sideBarStyles.footer}>
+          <span style={{ display: "block", fontSize: "11px" }}>
+            KZI Technologies Systems
+          </span>
+          <span style={{ display: "block", fontSize: "10px", opacity: 0.7 }}>
+            2026 / v1.0
+          </span>
+        </div>
+      )}
     </div>
   );
 };
