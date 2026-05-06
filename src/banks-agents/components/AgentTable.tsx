@@ -3,9 +3,10 @@ import { expensesTableStyles } from "../../expenses/styles/expensesTable.style";
 
 interface Props {
   data: BankAgent[];
+  onView: (customerId: string) => void;
 }
 
-export const BankAgentsTable = ({ data }: Props) => {
+export const BankAgentsTable = ({ data, onView }: Props) => {
   return (
     <table style={expensesTableStyles.table}>
       <thead style={expensesTableStyles.thead}>
@@ -19,14 +20,7 @@ export const BankAgentsTable = ({ data }: Props) => {
 
       <tbody>
         {data.map((c) => (
-          <tr
-            key={c.customerId}
-            style={expensesTableStyles.row}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "#020617")}
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.background = "transparent")
-            }
-          >
+          <tr key={c.customerId} style={expensesTableStyles.row}>
             <td style={expensesTableStyles.td}>
               {c.firstName} {c.lastName}
             </td>
@@ -39,7 +33,13 @@ export const BankAgentsTable = ({ data }: Props) => {
 
             <td style={expensesTableStyles.td}>
               <div style={expensesTableStyles.actions}>
-                <span style={expensesTableStyles.actionBtn}>👁</span>
+                <span
+                  style={expensesTableStyles.actionBtn}
+                  onClick={() => onView(c.customerId)}
+                >
+                  👁
+                </span>
+
                 <span style={expensesTableStyles.actionBtn}>✏️</span>
               </div>
             </td>
