@@ -1,11 +1,5 @@
 import { api } from "../../shared/services/api";
-
-type DetailItem = {
-  id: string;
-  amount: number;
-  createdAt: string;
-  checked: boolean;
-};
+import type { DetailItem } from "../interfaces/detail-item.interface";
 
 export const bankAgentService = {
   createBankAgent: async (payload: {
@@ -23,13 +17,12 @@ export const bankAgentService = {
     return res.data;
   },
 
-  // 🔥 ESTE ES EL QUE TE FALTABA
   getBankAgentsByCustomers: async () => {
     const res = await api.get("/bankAgents/bankAgents-customers");
 
     console.log("📊 DATA GET:", res.data);
 
-    return res.data.data; // 👈 IMPORTANTE (porque tu backend envuelve en data)
+    return res.data.data;
   },
 
   processBankAgents: async (data: DetailItem[]) => {
@@ -43,7 +36,7 @@ export const bankAgentService = {
     console.log("📤 PAYLOAD:", payload);
 
     const res = await api.post("/bankAgents/process", {
-      data: payload, // 👈 este sí está bien para el DTO
+      data: payload,
     });
 
     return res.data;

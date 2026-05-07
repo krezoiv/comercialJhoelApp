@@ -6,19 +6,10 @@ import { BankAgentsTable } from "../components/AgentTable";
 import { BankAgentForm } from "../components/AgentsForms";
 import type { BankAgentDetailResponse } from "../interfaces/bank-agent-detail-response";
 import { ConfirmModal } from "../../shared/utils/ConfirmModal";
-
-// 🔥 tipo para detalle
-interface DetailItem {
-  id: string;
-  amount: number;
-  createdAt: string;
-  checked: boolean;
-  bankName: string;
-  firstName: string;
-  lastName: string;
-  paymentDate: string;
-  userName: string;
-}
+import { useRef, useEffect } from "react";
+import { formatMoney } from "../../shared/utils/money.util";
+import { validateDecimalInput } from "../../shared/utils/numberInput.util";
+import type { DetailItem } from "../interfaces/detail-item.interface";
 
 export const BankAgentsPage = () => {
   const { data, loading, refetch } = useBankAgents();
@@ -31,6 +22,26 @@ export const BankAgentsPage = () => {
   const [saving] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false); // 👈 CIERRA
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // =========================
   // 🔵 CREATE
@@ -180,140 +191,209 @@ export const BankAgentsPage = () => {
       {/* 📦 DETALLE */}
       {/* ========================= */}
       {isDropdownOpen && (
-        <div style={{ marginTop: "25px" }}>
-          <h2
-            style={{
-              color: "white",
-              marginBottom: "20px",
-              fontSize: "22px",
-              fontWeight: "600",
-            }}
-          >
-            📄 Detalle del Cliente
-          </h2>
-
-          {/* 🔥 BOTÓN CONFIRMAR */}
-          <button
-            onClick={() => setShowConfirmModal(true)}
-            disabled={saving}
-            style={{
-              marginBottom: "20px",
-              background: "linear-gradient(135deg, #22c55e, #16a34a)",
-              padding: "12px 20px",
-              borderRadius: "10px",
-              color: "white",
-              border: "none",
-              fontWeight: "bold",
-              cursor: "pointer",
-              opacity: saving ? 0.6 : 1,
-            }}
-          >
-            {saving ? "Procesando..." : "✅ Confirmar"}
-          </button>
-
-          {detailData.map((item) => (
-            <div
-              key={item.id}
+        <div ref={dropdownRef}>
+          <div style={{ marginTop: "25px" }}>
+            <h2
               style={{
-                background: "#020617",
-                padding: "20px",
-                borderRadius: "14px",
-                marginBottom: "15px",
                 color: "white",
-                border: "1px solid #1e293b",
+                marginBottom: "20px",
+                fontSize: "22px",
+                fontWeight: "600",
               }}
             >
-              <h3 style={{ fontSize: "18px", fontWeight: "600" }}>
-                {item.firstName} {item.lastName}
-              </h3>
+              📄 Detalle del Cliente
+            </h2>
 
-              <p style={{ color: "#38bdf8" }}>🏦 {item.bankName}</p>
+            {/* 🔥 BOTÓN CONFIRMAR */}
+            <button
+              onClick={() => setShowConfirmModal(true)}
+              disabled={saving}
+              style={{
+                marginBottom: "20px",
+                background: "linear-gradient(135deg, #22c55e, #16a34a)",
+                padding: "12px 20px",
+                borderRadius: "10px",
+                color: "white",
+                border: "none",
+                fontWeight: "bold",
+                cursor: "pointer",
+                opacity: saving ? 0.6 : 1,
+              }}
+            >
+              {saving ? "Procesando..." : "✅ Confirmar"}
+            </button>
 
-              <p style={{ fontSize: "13px", opacity: 0.7 }}>
-                📅 {new Date(item.createdAt).toLocaleString()}
-              </p>
-
-              <p style={{ fontSize: "13px", opacity: 0.7 }}>
-                💳 {new Date(item.paymentDate).toLocaleDateString()}
-              </p>
-
-              {/* MONTO */}
-              <input
-                value={item.amount}
-                onChange={(e) => {
-                  const value = Number(e.target.value);
-
-                  setDetailData((prev) =>
-                    prev.map((x) =>
-                      x.id === item.id ? { ...x, amount: value } : x,
-                    ),
-                  );
-                }}
-                style={{
-                  width: "100%",
-                  marginTop: "10px",
-                  padding: "10px",
-                  background: "#1e293b",
-                  color: "white",
-                  border: "1px solid #334155",
-                  borderRadius: "8px",
-                }}
-              />
-
-              {/* ACCIONES */}
+            {detailData.map((item) => (
               <div
+                key={item.id}
                 style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  marginTop: "10px",
+                  background: "#020617",
+                  padding: "20px",
+                  borderRadius: "14px",
+                  marginBottom: "15px",
+                  color: "white",
+                  border: "1px solid #1e293b",
                 }}
               >
-                <button
+                <h3 style={{ fontSize: "18px", fontWeight: "600" }}>
+                  {item.firstName} {item.lastName}
+                </h3>
+
+                <p style={{ color: "#38bdf8" }}>🏦 {item.bankName}</p>
+
+                <p style={{ fontSize: "13px", opacity: 0.7 }}>
+                  📅 {new Date(item.createdAt).toLocaleString()}
+                </p>
+
+                <p style={{ fontSize: "13px", opacity: 0.7 }}>
+                  💳 {new Date(item.paymentDate).toLocaleDateString()}
+                </p>
+
+                {/* MONTO */}
+                <input
+                  value={
+                    editingId === item.id
+                      ? item.amount
+                      : formatMoney(Number(item.amount))
+                  }
+                  disabled={editingId !== item.id}
+                  onChange={(e) => {
+                    const validated = validateDecimalInput(
+                      e.target.value,
+                      item.amount.toString(),
+                    );
+
+                    if (validated === null) return;
+
+                    setDetailData((prev) =>
+                      prev.map((x) =>
+                        x.id === item.id ? { ...x, amount: validated } : x,
+                      ),
+                    );
+                  }}
+                  onBlur={() => {
+                    setDetailData((prev) =>
+                      prev.map((x) =>
+                        x.id === item.id
+                          ? {
+                              ...x,
+                              amount: Number(x.amount),
+                            }
+                          : x,
+                      ),
+                    );
+                  }}
                   style={{
-                    background: "#3b82f6",
-                    padding: "8px 14px",
-                    borderRadius: "8px",
+                    width: "100%",
+                    marginTop: "10px",
+                    padding: "12px",
+                    background: editingId === item.id ? "#0f172a" : "#1e293b",
                     color: "white",
-                    border: "none",
+                    border:
+                      editingId === item.id
+                        ? "1px solid #38bdf8"
+                        : "1px solid #334155",
+                    borderRadius: "10px",
+                    opacity: editingId === item.id ? 1 : 0.7,
+                    transition: "all 0.25s ease",
+                    fontSize: "16px",
+                    outline: "none",
+                    boxShadow:
+                      editingId === item.id
+                        ? "0 0 12px rgba(56,189,248,0.4)"
+                        : "none",
+                  }}
+                />
+
+                {/* ACCIONES */}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    marginTop: "10px",
                   }}
                 >
-                  ✏️ Editar
-                </button>
-
-                <label>
-                  Pagar{" "}
-                  <input
-                    type="checkbox"
-                    checked={item.checked}
-                    onChange={(e) => {
-                      setDetailData((prev) =>
-                        prev.map((x) =>
-                          x.id === item.id
-                            ? { ...x, checked: e.target.checked }
-                            : x,
-                        ),
-                      );
+                  <button
+                    onClick={() => {
+                      if (editingId === item.id) {
+                        setEditingId(null);
+                      } else {
+                        setEditingId(item.id);
+                      }
                     }}
-                  />
-                </label>
-              </div>
-              {/* ========================= */}
-              {/* 🧠 MODAL */}
-              {/* ========================= */}
-              <ConfirmModal
-                isOpen={showConfirmModal}
-                message="¿Seguro que deseas procesar estos pagos?"
-                onCancel={() => setShowConfirmModal(false)}
-                onConfirm={handleConfirm}
-              />
+                    style={{
+                      background:
+                        editingId === item.id
+                          ? "linear-gradient(135deg,#22c55e,#16a34a)"
+                          : "linear-gradient(135deg,#3b82f6,#2563eb)",
+                      padding: "10px 16px",
+                      borderRadius: "10px",
+                      color: "white",
+                      border: "none",
+                      cursor: "pointer",
+                      fontWeight: 600,
+                      transition: "all 0.25s ease",
+                      transform:
+                        editingId === item.id ? "scale(1.03)" : "scale(1)",
+                      boxShadow:
+                        editingId === item.id
+                          ? "0 0 18px rgba(34,197,94,.45)"
+                          : "0 0 18px rgba(59,130,246,.25)",
+                    }}
+                  >
+                    {editingId === item.id ? "💾 Guardar" : "✏️ Editar"}
+                  </button>
 
-              <p style={{ fontSize: "12px", opacity: 0.5, marginTop: "10px" }}>
-                creado por: {item.userName.toLowerCase()}
-              </p>
-            </div>
-          ))}
+                  <label style={styles.checkboxContainer}>
+                    Pagar{" "}
+                    <input
+                      type="checkbox"
+                      checked={item.checked}
+                      readOnly // 🚫 evita cambio con click normal
+                      onDoubleClick={() => {
+                        setDetailData((prev) =>
+                          prev.map((x) =>
+                            x.id === item.id
+                              ? { ...x, checked: !x.checked }
+                              : x,
+                          ),
+                        );
+                      }}
+                    />
+                  </label>
+                </div>
+                {/* ========================= */}
+                {/* 🧠 MODAL */}
+                {/* ========================= */}
+                <ConfirmModal
+                  isOpen={showConfirmModal}
+                  message="¿Seguro que deseas procesar estos pagos?"
+                  onCancel={() => setShowConfirmModal(false)}
+                  onConfirm={handleConfirm}
+                />
+
+                <p
+                  style={{ fontSize: "12px", opacity: 0.5, marginTop: "10px" }}
+                >
+                  creado por: {item.userName.toLowerCase()}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
   );
+};
+
+const styles: Record<string, React.CSSProperties> = {
+  checkboxContainer: {
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+    cursor: "pointer",
+    userSelect: "none",
+    fontSize: "14px",
+    opacity: 0.9,
+  },
 };
