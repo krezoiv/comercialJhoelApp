@@ -10,6 +10,7 @@ import { useRef, useEffect } from "react";
 import { formatMoney } from "../../shared/utils/money.util";
 import { validateDecimalInput } from "../../shared/utils/numberInput.util";
 import type { DetailItem } from "../interfaces/detail-item.interface";
+import { bankAgentPageStyles } from "../styles/bankPage.style";
 
 export const BankAgentsPage = () => {
   const { data, loading, refetch } = useBankAgents();
@@ -145,36 +146,12 @@ export const BankAgentsPage = () => {
 
       {/* 🔴 ERROR */}
       {errorMessage && (
-        <div
-          style={{
-            background: "#ff4d4f",
-            color: "white",
-            padding: "12px",
-            borderRadius: "8px",
-            marginBottom: "15px",
-            textAlign: "center",
-          }}
-        >
-          {errorMessage}
-        </div>
+        <div style={bankAgentPageStyles.errorMessage}>{errorMessage}</div>
       )}
 
       {/* 🔵 SUCCESS */}
       {successMessage && (
-        <div
-          style={{
-            position: "fixed",
-            top: "20px",
-            right: "20px",
-            background: "#1677ff",
-            color: "white",
-            padding: "14px 20px",
-            borderRadius: "10px",
-            zIndex: 9999,
-          }}
-        >
-          {successMessage}
-        </div>
+        <div style={bankAgentPageStyles.successMessage}>{successMessage}</div>
       )}
 
       {/* FORM */}
@@ -193,14 +170,7 @@ export const BankAgentsPage = () => {
       {isDropdownOpen && (
         <div ref={dropdownRef}>
           <div style={{ marginTop: "25px" }}>
-            <h2
-              style={{
-                color: "white",
-                marginBottom: "20px",
-                fontSize: "22px",
-                fontWeight: "600",
-              }}
-            >
+            <h2 style={bankAgentPageStyles.isDropdownOpen}>
               📄 Detalle del Cliente
             </h2>
 
@@ -209,32 +179,15 @@ export const BankAgentsPage = () => {
               onClick={() => setShowConfirmModal(true)}
               disabled={saving}
               style={{
-                marginBottom: "20px",
-                background: "linear-gradient(135deg, #22c55e, #16a34a)",
-                padding: "12px 20px",
-                borderRadius: "10px",
-                color: "white",
-                border: "none",
-                fontWeight: "bold",
-                cursor: "pointer",
-                opacity: saving ? 0.6 : 1,
+                ...bankAgentPageStyles.confirmButton,
+                ...(saving ? bankAgentPageStyles.confirmButtonDisabled : {}),
               }}
             >
               {saving ? "Procesando..." : "✅ Confirmar"}
             </button>
 
             {detailData.map((item) => (
-              <div
-                key={item.id}
-                style={{
-                  background: "#020617",
-                  padding: "20px",
-                  borderRadius: "14px",
-                  marginBottom: "15px",
-                  color: "white",
-                  border: "1px solid #1e293b",
-                }}
-              >
+              <div key={item.id} style={bankAgentPageStyles.detailData}>
                 <h3 style={{ fontSize: "18px", fontWeight: "600" }}>
                   {item.firstName} {item.lastName}
                 </h3>
@@ -284,24 +237,11 @@ export const BankAgentsPage = () => {
                     );
                   }}
                   style={{
-                    width: "100%",
-                    marginTop: "10px",
-                    padding: "12px",
-                    background: editingId === item.id ? "#0f172a" : "#1e293b",
-                    color: "white",
-                    border:
-                      editingId === item.id
-                        ? "1px solid #38bdf8"
-                        : "1px solid #334155",
-                    borderRadius: "10px",
-                    opacity: editingId === item.id ? 1 : 0.7,
-                    transition: "all 0.25s ease",
-                    fontSize: "16px",
-                    outline: "none",
-                    boxShadow:
-                      editingId === item.id
-                        ? "0 0 12px rgba(56,189,248,0.4)"
-                        : "none",
+                    ...bankAgentPageStyles.amountInput,
+
+                    ...(editingId === item.id
+                      ? bankAgentPageStyles.amountInputEditing
+                      : bankAgentPageStyles.amountInputDisabled),
                   }}
                 />
 
@@ -322,34 +262,28 @@ export const BankAgentsPage = () => {
                       }
                     }}
                     style={{
-                      background:
-                        editingId === item.id
-                          ? "linear-gradient(135deg,#22c55e,#16a34a)"
-                          : "linear-gradient(135deg,#3b82f6,#2563eb)",
-                      padding: "10px 16px",
-                      borderRadius: "10px",
-                      color: "white",
-                      border: "none",
-                      cursor: "pointer",
-                      fontWeight: 600,
-                      transition: "all 0.25s ease",
-                      transform:
-                        editingId === item.id ? "scale(1.03)" : "scale(1)",
-                      boxShadow:
-                        editingId === item.id
-                          ? "0 0 18px rgba(34,197,94,.45)"
-                          : "0 0 18px rgba(59,130,246,.25)",
+                      ...bankAgentPageStyles.saveButton,
+
+                      ...(editingId === item.id
+                        ? bankAgentPageStyles.saveButtonEditing
+                        : bankAgentPageStyles.saveButtonDefault),
                     }}
                   >
                     {editingId === item.id ? "💾 Guardar" : "✏️ Editar"}
                   </button>
-
-                  <label style={styles.checkboxContainer}>
+                  <label style={bankAgentPageStyles.checkboxContainer}>
                     Pagar{" "}
                     <input
                       type="checkbox"
                       checked={item.checked}
-                      readOnly // 🚫 evita cambio con click normal
+                      style={{
+                        ...bankAgentPageStyles.checkbox,
+
+                        ...(item.checked
+                          ? bankAgentPageStyles.checkboxChecked
+                          : bankAgentPageStyles.checkboxUnchecked),
+                      }}
+                      onClick={(e) => e.preventDefault()}
                       onDoubleClick={() => {
                         setDetailData((prev) =>
                           prev.map((x) =>
@@ -384,16 +318,4 @@ export const BankAgentsPage = () => {
       )}
     </div>
   );
-};
-
-const styles: Record<string, React.CSSProperties> = {
-  checkboxContainer: {
-    display: "flex",
-    alignItems: "center",
-    gap: "6px",
-    cursor: "pointer",
-    userSelect: "none",
-    fontSize: "14px",
-    opacity: 0.9,
-  },
 };
