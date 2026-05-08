@@ -22,46 +22,113 @@ export const ExpensesTable = ({ data }: Props) => {
           <tr
             key={c.customerId}
             style={expensesTableStyles.row}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "#020617")}
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.background = "transparent")
-            }
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(15,23,42,.92)";
+
+              e.currentTarget.style.transform = "translateY(-2px)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "transparent";
+
+              e.currentTarget.style.transform = "translateY(0px)";
+            }}
           >
+            {/* CLIENTE */}
             <td style={expensesTableStyles.td}>
-              {c.firstName} {c.lastName}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "14px",
+                }}
+              >
+                {/* AVATAR */}
+                <div
+                  style={{
+                    width: "48px",
+                    height: "48px",
+                    borderRadius: "50%",
+
+                    background: "linear-gradient(135deg,#6366f1,#3b82f6)",
+
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+
+                    color: "white",
+                    fontWeight: 700,
+                    fontSize: "18px",
+
+                    boxShadow: "0 0 18px rgba(99,102,241,.35)",
+                  }}
+                >
+                  {c.firstName.charAt(0)}
+                </div>
+
+                {/* INFO */}
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontWeight: 700,
+                      fontSize: "16px",
+                    }}
+                  >
+                    {c.firstName} {c.lastName}
+                  </span>
+
+                  <span
+                    style={{
+                      opacity: 0.6,
+                      fontSize: "13px",
+                    }}
+                  >
+                    ID: {c.customerId.slice(0, 8)}
+                  </span>
+                </div>
+              </div>
             </td>
 
+            {/* TOTAL */}
             <td style={expensesTableStyles.td}>{c.totalExpenses}</td>
 
-            <td style={expensesTableStyles.td}>
+            {/* MONTO */}
+            <td
+              style={{
+                ...expensesTableStyles.td,
+                color: "#22c55e",
+                fontWeight: 700,
+                fontSize: "16px",
+              }}
+            >
               Q {Number(c.totalAmount).toFixed(2)}
             </td>
 
+            {/* ACTIONS */}
             <td style={expensesTableStyles.td}>
               <div style={expensesTableStyles.actions}>
-                <span
-                  style={expensesTableStyles.actionBtn}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.transform = "scale(1.2)")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.transform = "scale(1)")
-                  }
+                {/* VER */}
+                <button
+                  style={{
+                    ...expensesTableStyles.viewButton,
+                  }}
                 >
-                  👁
-                </span>
+                  👁 Ver
+                </button>
 
-                <span
-                  style={expensesTableStyles.actionBtn}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.transform = "scale(1.2)")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.transform = "scale(1)")
-                  }
+                {/* EDITAR */}
+                <button
+                  style={{
+                    ...expensesTableStyles.editButton,
+                  }}
                 >
-                  ✏️
-                </span>
+                  ✏️ Editar
+                </button>
               </div>
             </td>
           </tr>

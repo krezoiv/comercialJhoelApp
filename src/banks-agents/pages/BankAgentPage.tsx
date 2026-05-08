@@ -140,182 +140,204 @@ export const BankAgentsPage = () => {
     return <p style={expensesPageStyles.loading}>Cargando...</p>;
   }
 
+  const fadeInKeyframes = `
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(.96);
+    filter: blur(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0px) scale(1);
+    filter: blur(0px);
+  }
+}
+`;
   return (
-    <div style={expensesPageStyles.inner}>
-      <h1 style={expensesPageStyles.title}>🏦 Agentes Bancarios</h1>
+    <>
+      <style>{fadeInKeyframes}</style>
+      <div style={expensesPageStyles.inner}>
+        <h1 style={expensesPageStyles.title}>🏦 Agentes Bancarios</h1>
 
-      {/* 🔴 ERROR */}
-      {errorMessage && (
-        <div style={bankAgentPageStyles.errorMessage}>{errorMessage}</div>
-      )}
+        {/* 🔴 ERROR */}
+        {errorMessage && (
+          <div style={bankAgentPageStyles.errorMessage}>{errorMessage}</div>
+        )}
 
-      {/* 🔵 SUCCESS */}
-      {successMessage && (
-        <div style={bankAgentPageStyles.successMessage}>{successMessage}</div>
-      )}
+        {/* 🔵 SUCCESS */}
+        {successMessage && (
+          <div style={bankAgentPageStyles.successMessage}>{successMessage}</div>
+        )}
 
-      {/* FORM */}
-      <div style={expensesPageStyles.card}>
-        <BankAgentForm onSubmit={handleCreate} />
-      </div>
+        {/* FORM */}
+        <div style={expensesPageStyles.card}>
+          <BankAgentForm onSubmit={handleCreate} />
+        </div>
 
-      {/* TABLE */}
-      <div style={expensesPageStyles.card}>
-        <BankAgentsTable data={data} onView={handleView} />
-      </div>
+        {/* TABLE */}
+        <div style={expensesPageStyles.card}>
+          <BankAgentsTable data={data} onView={handleView} />
+        </div>
 
-      {/* ========================= */}
-      {/* 📦 DETALLE */}
-      {/* ========================= */}
-      {isDropdownOpen && (
-        <div ref={dropdownRef}>
-          <div style={{ marginTop: "25px" }}>
-            <h2 style={bankAgentPageStyles.isDropdownOpen}>
-              📄 Detalle del Cliente
-            </h2>
+        {/* ========================= */}
+        {/* 📦 DETALLE */}
+        {/* ========================= */}
+        {isDropdownOpen && (
+          <div ref={dropdownRef}>
+            <div style={{ marginTop: "25px" }}>
+              <h2 style={bankAgentPageStyles.isDropdownOpen}>
+                📄 Detalle del Cliente
+              </h2>
 
-            {/* 🔥 BOTÓN CONFIRMAR */}
-            <button
-              onClick={() => setShowConfirmModal(true)}
-              disabled={saving}
-              style={{
-                ...bankAgentPageStyles.confirmButton,
-                ...(saving ? bankAgentPageStyles.confirmButtonDisabled : {}),
-              }}
-            >
-              {saving ? "Procesando..." : "✅ Confirmar"}
-            </button>
+              {/* 🔥 BOTÓN CONFIRMAR */}
+              <button
+                onClick={() => setShowConfirmModal(true)}
+                disabled={saving}
+                style={{
+                  ...bankAgentPageStyles.confirmButton,
+                  ...(saving ? bankAgentPageStyles.confirmButtonDisabled : {}),
+                }}
+              >
+                {saving ? "Procesando..." : "✅ Confirmar"}
+              </button>
 
-            {detailData.map((item) => (
-              <div key={item.id} style={bankAgentPageStyles.detailData}>
-                <h3 style={{ fontSize: "18px", fontWeight: "600" }}>
-                  {item.firstName} {item.lastName}
-                </h3>
+              {detailData.map((item) => (
+                <div key={item.id} style={bankAgentPageStyles.detailData}>
+                  <h3 style={{ fontSize: "18px", fontWeight: "600" }}>
+                    {item.firstName} {item.lastName}
+                  </h3>
 
-                <p style={{ color: "#38bdf8" }}>🏦 {item.bankName}</p>
+                  <p style={{ color: "#38bdf8" }}>🏦 {item.bankName}</p>
 
-                <p style={{ fontSize: "13px", opacity: 0.7 }}>
-                  📅 {new Date(item.createdAt).toLocaleString()}
-                </p>
+                  <p style={{ fontSize: "13px", opacity: 0.7 }}>
+                    📅 {new Date(item.createdAt).toLocaleString()}
+                  </p>
 
-                <p style={{ fontSize: "13px", opacity: 0.7 }}>
-                  💳 {new Date(item.paymentDate).toLocaleDateString()}
-                </p>
+                  <p style={{ fontSize: "13px", opacity: 0.7 }}>
+                    💳 {new Date(item.paymentDate).toLocaleDateString()}
+                  </p>
 
-                {/* MONTO */}
-                <input
-                  value={
-                    editingId === item.id
-                      ? item.amount
-                      : formatMoney(Number(item.amount))
-                  }
-                  disabled={editingId !== item.id}
-                  onChange={(e) => {
-                    const validated = validateDecimalInput(
-                      e.target.value,
-                      item.amount.toString(),
-                    );
+                  {/* MONTO */}
+                  <input
+                    value={
+                      editingId === item.id
+                        ? item.amount
+                        : formatMoney(Number(item.amount))
+                    }
+                    disabled={editingId !== item.id}
+                    onChange={(e) => {
+                      const validated = validateDecimalInput(
+                        e.target.value,
+                        item.amount.toString(),
+                      );
 
-                    if (validated === null) return;
+                      if (validated === null) return;
 
-                    setDetailData((prev) =>
-                      prev.map((x) =>
-                        x.id === item.id ? { ...x, amount: validated } : x,
-                      ),
-                    );
-                  }}
-                  onBlur={() => {
-                    setDetailData((prev) =>
-                      prev.map((x) =>
-                        x.id === item.id
-                          ? {
-                              ...x,
-                              amount: Number(x.amount),
-                            }
-                          : x,
-                      ),
-                    );
-                  }}
-                  style={{
-                    ...bankAgentPageStyles.amountInput,
-
-                    ...(editingId === item.id
-                      ? bankAgentPageStyles.amountInputEditing
-                      : bankAgentPageStyles.amountInputDisabled),
-                  }}
-                />
-
-                {/* ACCIONES */}
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginTop: "10px",
-                  }}
-                >
-                  <button
-                    onClick={() => {
-                      if (editingId === item.id) {
-                        setEditingId(null);
-                      } else {
-                        setEditingId(item.id);
-                      }
+                      setDetailData((prev) =>
+                        prev.map((x) =>
+                          x.id === item.id ? { ...x, amount: validated } : x,
+                        ),
+                      );
+                    }}
+                    onBlur={() => {
+                      setDetailData((prev) =>
+                        prev.map((x) =>
+                          x.id === item.id
+                            ? {
+                                ...x,
+                                amount: Number(x.amount),
+                              }
+                            : x,
+                        ),
+                      );
                     }}
                     style={{
-                      ...bankAgentPageStyles.saveButton,
+                      ...bankAgentPageStyles.amountInput,
 
                       ...(editingId === item.id
-                        ? bankAgentPageStyles.saveButtonEditing
-                        : bankAgentPageStyles.saveButtonDefault),
+                        ? bankAgentPageStyles.amountInputEditing
+                        : bankAgentPageStyles.amountInputDisabled),
+                    }}
+                  />
+
+                  {/* ACCIONES */}
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      marginTop: "10px",
                     }}
                   >
-                    {editingId === item.id ? "💾 Guardar" : "✏️ Editar"}
-                  </button>
-                  <label style={bankAgentPageStyles.checkboxContainer}>
-                    Pagar{" "}
-                    <input
-                      type="checkbox"
-                      checked={item.checked}
+                    <button
+                      onClick={() => {
+                        if (editingId === item.id) {
+                          setEditingId(null);
+                        } else {
+                          setEditingId(item.id);
+                        }
+                      }}
                       style={{
-                        ...bankAgentPageStyles.checkbox,
+                        ...bankAgentPageStyles.saveButton,
 
-                        ...(item.checked
-                          ? bankAgentPageStyles.checkboxChecked
-                          : bankAgentPageStyles.checkboxUnchecked),
+                        ...(editingId === item.id
+                          ? bankAgentPageStyles.saveButtonEditing
+                          : bankAgentPageStyles.saveButtonDefault),
                       }}
-                      onClick={(e) => e.preventDefault()}
-                      onDoubleClick={() => {
-                        setDetailData((prev) =>
-                          prev.map((x) =>
-                            x.id === item.id
-                              ? { ...x, checked: !x.checked }
-                              : x,
-                          ),
-                        );
-                      }}
-                    />
-                  </label>
+                    >
+                      {editingId === item.id ? "💾 Guardar" : "✏️ Editar"}
+                    </button>
+                    <label style={bankAgentPageStyles.checkboxContainer}>
+                      Pagar{" "}
+                      <input
+                        type="checkbox"
+                        checked={item.checked}
+                        style={{
+                          ...bankAgentPageStyles.checkbox,
+
+                          ...(item.checked
+                            ? bankAgentPageStyles.checkboxChecked
+                            : bankAgentPageStyles.checkboxUnchecked),
+                        }}
+                        onClick={(e) => e.preventDefault()}
+                        onDoubleClick={() => {
+                          setDetailData((prev) =>
+                            prev.map((x) =>
+                              x.id === item.id
+                                ? { ...x, checked: !x.checked }
+                                : x,
+                            ),
+                          );
+                        }}
+                      />
+                    </label>
+                  </div>
+                  {/* ========================= */}
+                  {/* 🧠 MODAL */}
+                  {/* ========================= */}
+                  <ConfirmModal
+                    isOpen={showConfirmModal}
+                    message="¿Seguro que deseas procesar estos pagos?"
+                    onCancel={() => setShowConfirmModal(false)}
+                    onConfirm={handleConfirm}
+                  />
+
+                  <p
+                    style={{
+                      fontSize: "12px",
+                      opacity: 0.5,
+                      marginTop: "10px",
+                    }}
+                  >
+                    creado por: {item.userName.toLowerCase()}
+                  </p>
                 </div>
-                {/* ========================= */}
-                {/* 🧠 MODAL */}
-                {/* ========================= */}
-                <ConfirmModal
-                  isOpen={showConfirmModal}
-                  message="¿Seguro que deseas procesar estos pagos?"
-                  onCancel={() => setShowConfirmModal(false)}
-                  onConfirm={handleConfirm}
-                />
-
-                <p
-                  style={{ fontSize: "12px", opacity: 0.5, marginTop: "10px" }}
-                >
-                  creado por: {item.userName.toLowerCase()}
-                </p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
 };
