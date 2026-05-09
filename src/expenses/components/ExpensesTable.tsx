@@ -1,11 +1,15 @@
 import type { ExpenseCustomer } from "../interfaces/expense-customer.interface";
 import { expensesTableStyles } from "../styles/expensesTable.style";
+import { useState } from "react";
+import { ExpenseDrillDown } from "./ExpenseDrillDown";
 
 interface Props {
   data: ExpenseCustomer[];
+  onRefresh: () => void;
 }
 
-export const ExpensesTable = ({ data }: Props) => {
+export const ExpensesTable = ({ data, onRefresh }: Props) => {
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   return (
     <table style={expensesTableStyles.table}>
       <thead style={expensesTableStyles.thead}>
@@ -117,6 +121,11 @@ export const ExpensesTable = ({ data }: Props) => {
                   style={{
                     ...expensesTableStyles.viewButton,
                   }}
+                  onClick={() =>
+                    setExpandedId(
+                      expandedId === c.customerId ? null : c.customerId,
+                    )
+                  }
                 >
                   👁 Ver
                 </button>
@@ -131,6 +140,22 @@ export const ExpensesTable = ({ data }: Props) => {
                 </button>
               </div>
             </td>
+            {expandedId === c.customerId && (
+              <tr>
+                <td
+                  colSpan={4}
+                  style={{
+                    padding: "0px",
+                    background: "transparent",
+                  }}
+                >
+                  <ExpenseDrillDown
+                    customerId={c.customerId}
+                    onRefresh={onRefresh}
+                  />
+                </td>
+              </tr>
+            )}
           </tr>
         ))}
       </tbody>

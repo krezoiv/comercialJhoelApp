@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { MoneyInput } from "../../shared/components/MoneyInput";
 import { expenseFormStyles } from "../styles/expenseform.style";
 import { customerService } from "../../customers/customers.service";
@@ -202,60 +203,193 @@ export const ExpenseForm = ({ onSubmit }: Props) => {
         <div
           style={{
             position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            background: "rgba(0,0,0,0.6)",
-            backdropFilter: "blur(6px)",
-            zIndex: 9999,
-            animation: "fadeInBackdrop 0.25s ease",
+            inset: 0,
+
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+
+            padding: "24px",
+
+            background: "rgba(2,6,23,.35)",
+            backdropFilter: "blur(18px) saturate(180%)",
+            WebkitBackdropFilter: "blur(18px) saturate(180%)",
+
+            zIndex: 999999,
+
+            animation: "fadeInBackdrop .25s ease",
           }}
         >
           <div
             style={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              background: "#0b1220",
-              padding: "25px",
-              borderRadius: "20px",
-              width: "350px",
-              boxShadow: "0 30px 80px rgba(0,0,0,0.9)",
-              textAlign: "center",
-              color: "#fff",
-              animation: "iosModalIn 0.25s ease",
+              width: "100%",
+              maxWidth: "420px",
+              maxHeight: "90vh",
+              overflowY: "auto",
+
+              background: "linear-gradient(180deg,#0f172a 0%, #020617 100%)",
+
+              borderRadius: "24px",
+
+              padding: "28px",
+
+              border: "1px solid rgba(255,255,255,.06)",
+
+              boxShadow: `
+          0 40px 120px rgba(0,0,0,.92),
+          0 0 50px rgba(34,197,94,.12)
+        `,
+
+              color: "white",
+
+              animation: "iosModalIn .28s cubic-bezier(.16,1,.3,1)",
             }}
           >
-            <h3>Confirmar gasto</h3>
+            {/* HEADER */}
+            <div
+              style={{
+                marginBottom: "18px",
+              }}
+            >
+              <h2
+                style={{
+                  margin: 0,
+                  fontSize: "24px",
+                  fontWeight: 800,
+                }}
+              >
+                Confirmar gasto
+              </h2>
 
-            <p style={{ fontSize: "14px", opacity: 0.8 }}>
-              ¿Deseas guardar este gasto?
-            </p>
+              <p
+                style={{
+                  marginTop: "8px",
+                  opacity: 0.72,
+                  fontSize: "14px",
+                  lineHeight: 1.5,
+                }}
+              >
+                Verifica la información antes de guardar.
+              </p>
+            </div>
 
-            <div style={{ marginTop: "10px", fontSize: "14px" }}>
+            {/* INFO */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "14px",
+
+                background: "rgba(255,255,255,.03)",
+
+                borderRadius: "18px",
+
+                padding: "18px",
+
+                border: "1px solid rgba(255,255,255,.04)",
+              }}
+            >
               <div>
-                <strong>Cliente:</strong> {selectedClient?.firstName}{" "}
-                {selectedClient?.lastName}
+                <div
+                  style={{
+                    fontSize: "12px",
+                    opacity: 0.55,
+                    marginBottom: "4px",
+                  }}
+                >
+                  CLIENTE
+                </div>
+
+                <div
+                  style={{
+                    fontWeight: 700,
+                    fontSize: "16px",
+                  }}
+                >
+                  {selectedClient?.firstName} {selectedClient?.lastName}
+                </div>
               </div>
+
               <div>
-                <strong>Monto:</strong> Q {Number(expenseAmount)}
+                <div
+                  style={{
+                    fontSize: "12px",
+                    opacity: 0.55,
+                    marginBottom: "4px",
+                  }}
+                >
+                  TIPO
+                </div>
+
+                <div
+                  style={{
+                    color: "#38bdf8",
+                    fontWeight: 700,
+                    textTransform: "capitalize",
+                  }}
+                >
+                  {expenseType}
+                </div>
               </div>
+
               <div>
-                <strong>Tipo:</strong> {expenseType}
+                <div
+                  style={{
+                    fontSize: "12px",
+                    opacity: 0.55,
+                    marginBottom: "4px",
+                  }}
+                >
+                  MONTO
+                </div>
+
+                <div
+                  style={{
+                    color: "#22c55e",
+                    fontWeight: 800,
+                    fontSize: "28px",
+                  }}
+                >
+                  Q {Number(expenseAmount).toFixed(2)}
+                </div>
               </div>
             </div>
 
-            <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
+            {/* ACTIONS */}
+            <div
+              style={{
+                display: "flex",
+                gap: "12px",
+
+                marginTop: "28px",
+
+                position: "sticky",
+                bottom: 0,
+
+                background: "linear-gradient(180deg,transparent,#020617)",
+
+                paddingTop: "18px",
+              }}
+            >
               <button
                 style={{
                   flex: 1,
-                  padding: "10px",
-                  borderRadius: "10px",
-                  border: "none",
-                  background: "#444",
-                  color: "#fff",
+
+                  padding: "14px",
+
+                  borderRadius: "14px",
+
+                  border: "1px solid rgba(255,255,255,.06)",
+
+                  background: "rgba(255,255,255,.06)",
+
+                  color: "white",
+
+                  cursor: "pointer",
+
+                  fontWeight: 700,
+
+                  transition: "all .25s ease",
                 }}
                 onClick={() => setShowConfirm(false)}
               >
@@ -265,12 +399,24 @@ export const ExpenseForm = ({ onSubmit }: Props) => {
               <button
                 style={{
                   flex: 1,
-                  padding: "10px",
-                  borderRadius: "10px",
+
+                  padding: "14px",
+
+                  borderRadius: "14px",
+
                   border: "none",
-                  background: "linear-gradient(135deg, #00c853, #00e676)",
-                  color: "#fff",
-                  fontWeight: "bold",
+
+                  background: "linear-gradient(135deg,#00c853,#00e676)",
+
+                  color: "white",
+
+                  fontWeight: 800,
+
+                  cursor: "pointer",
+
+                  boxShadow: "0 0 24px rgba(0,200,83,.45)",
+
+                  transition: "all .25s ease",
                 }}
                 onClick={() => {
                   setShowConfirm(false);
@@ -280,12 +426,212 @@ export const ExpenseForm = ({ onSubmit }: Props) => {
                   } as React.FormEvent);
                 }}
               >
-                Confirmar
+                💾 Confirmar
               </button>
             </div>
           </div>
         </div>
       )}
+      {showConfirm &&
+        createPortal(
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+
+              background: "rgba(2,6,23,.45)",
+
+              backdropFilter: "blur(14px)",
+              WebkitBackdropFilter: "blur(14px)",
+
+              zIndex: 999999999,
+            }}
+          >
+            <div
+              style={{
+                width: "100%",
+                maxWidth: "420px",
+
+                background: "linear-gradient(180deg,#0f172a,#020617)",
+
+                borderRadius: "26px",
+
+                padding: "28px",
+
+                border: "1px solid rgba(255,255,255,.06)",
+
+                boxShadow: `
+              0 50px 140px rgba(0,0,0,.95),
+              0 0 60px rgba(34,197,94,.10)
+            `,
+
+                color: "white",
+
+                animation: "iosModalIn .28s cubic-bezier(.16,1,.3,1)",
+              }}
+            >
+              <h2
+                style={{
+                  marginTop: 0,
+                  fontSize: "28px",
+                  fontWeight: 800,
+                }}
+              >
+                Confirmar gasto
+              </h2>
+
+              <p
+                style={{
+                  opacity: 0.72,
+                  marginBottom: "24px",
+                }}
+              >
+                Verifica la información antes de guardar.
+              </p>
+
+              <div
+                style={{
+                  background: "rgba(255,255,255,.03)",
+
+                  borderRadius: "18px",
+
+                  padding: "18px",
+
+                  marginBottom: "24px",
+
+                  border: "1px solid rgba(255,255,255,.04)",
+                }}
+              >
+                <div style={{ marginBottom: "14px" }}>
+                  <div
+                    style={{
+                      opacity: 0.5,
+                      fontSize: "12px",
+                    }}
+                  >
+                    CLIENTE
+                  </div>
+
+                  <div
+                    style={{
+                      fontSize: "18px",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {selectedClient?.firstName} {selectedClient?.lastName}
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: "14px" }}>
+                  <div
+                    style={{
+                      opacity: 0.5,
+                      fontSize: "12px",
+                    }}
+                  >
+                    TIPO
+                  </div>
+
+                  <div
+                    style={{
+                      color: "#38bdf8",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {expenseType}
+                  </div>
+                </div>
+
+                <div>
+                  <div
+                    style={{
+                      opacity: 0.5,
+                      fontSize: "12px",
+                    }}
+                  >
+                    MONTO
+                  </div>
+
+                  <div
+                    style={{
+                      color: "#22c55e",
+                      fontWeight: 800,
+                      fontSize: "34px",
+                    }}
+                  >
+                    Q {Number(expenseAmount).toFixed(2)}
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  gap: "12px",
+                }}
+              >
+                <button
+                  style={{
+                    flex: 1,
+
+                    padding: "14px",
+
+                    borderRadius: "14px",
+
+                    border: "1px solid rgba(255,255,255,.06)",
+
+                    background: "rgba(255,255,255,.05)",
+
+                    color: "white",
+
+                    fontWeight: 700,
+
+                    cursor: "pointer",
+                  }}
+                  onClick={() => setShowConfirm(false)}
+                >
+                  Cancelar
+                </button>
+
+                <button
+                  style={{
+                    flex: 1,
+
+                    padding: "14px",
+
+                    borderRadius: "14px",
+
+                    border: "none",
+
+                    background: "linear-gradient(135deg,#00c853,#00e676)",
+
+                    color: "white",
+
+                    fontWeight: 800,
+
+                    cursor: "pointer",
+
+                    boxShadow: "0 0 30px rgba(0,200,83,.45)",
+                  }}
+                  onClick={() => {
+                    setShowConfirm(false);
+
+                    handleSubmit({
+                      preventDefault: () => {},
+                    } as React.FormEvent);
+                  }}
+                >
+                  💾 Confirmar
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
 
       {/* 🔥 TOAST */}
       {showToast && (

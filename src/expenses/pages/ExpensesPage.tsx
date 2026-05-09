@@ -72,7 +72,7 @@ export const ExpensesPage = () => {
             animationDelay: "0.12s",
           }}
         >
-          <ExpensesTable data={data} />
+          <ExpensesTable data={data} onRefresh={refetch} />
         </div>
       </div>
     </>
