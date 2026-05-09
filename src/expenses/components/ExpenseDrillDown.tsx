@@ -6,20 +6,34 @@ import { ExpenseDetailCard } from "./ExpenseDetailCard";
 
 import { expenseService } from "../services/expense.service";
 
+import { ConfirmModal } from "../../shared/utils/ConfirmModal";
+
 interface Props {
   customerId: string;
+
   onRefresh: () => void;
 }
+
 interface ExpenseChange {
   id: string;
+
   amount: number;
+
   createdAt: string;
+
   checked: boolean;
 }
+
 export const ExpenseDrillDown = ({ customerId, onRefresh }: Props) => {
   const { data, loading, refetch } = useExpenseDetail(customerId, true);
 
   const [changes, setChanges] = useState<ExpenseChange[]>([]);
+
+  const [selectAll, setSelectAll] = useState(false);
+
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const handleChange = (change: ExpenseChange) => {
     setChanges((prev) => {
@@ -33,28 +47,51 @@ export const ExpenseDrillDown = ({ customerId, onRefresh }: Props) => {
     });
   };
 
-  const handleSaveAll = async () => {
-    try {
-      if (!changes.length) {
-        alert("No hay cambios");
-        return;
-      }
+  const handleSelectAll = () => {
+    const newValue = !selectAll;
 
+    setSelectAll(newValue);
+
+    const allChanges = data.map((item) => ({
+      id: item.id,
+
+      amount: Number(item.amount),
+
+      createdAt: new Date(item.createdAt).toISOString(),
+
+      checked: newValue,
+    }));
+
+    setChanges(allChanges);
+  };
+
+  const handleSaveAll = () => {
+    if (!changes.length) {
+      return;
+    }
+
+    setShowConfirm(true);
+  };
+
+  const confirmSave = async () => {
+    try {
       await expenseService.processExpenses({
         data: changes,
       });
 
-      alert("Cambios guardados");
-
       setChanges([]);
+
+      setSelectAll(false);
 
       refetch();
 
       onRefresh();
+
+      setShowConfirm(false);
+
+      setShowSuccess(true);
     } catch (error) {
       console.error(error);
-
-      alert("Error guardando cambios");
     }
   };
 
@@ -63,6 +100,7 @@ export const ExpenseDrillDown = ({ customerId, onRefresh }: Props) => {
       <div
         style={{
           padding: "30px",
+
           color: "white",
         }}
       >
@@ -74,9 +112,10 @@ export const ExpenseDrillDown = ({ customerId, onRefresh }: Props) => {
   return (
     <div
       style={{
-        width: "90%",
-        maxWidth: "950px",
-        minWidth: "700px",
+        width: "100%",
+
+        maxWidth: "1400px",
+
         margin: "0 auto",
 
         background: `
@@ -91,7 +130,7 @@ export const ExpenseDrillDown = ({ customerId, onRefresh }: Props) => {
 
         borderRadius: "28px",
 
-        padding: "24px",
+        padding: "30px",
 
         boxShadow: `
           0 30px 60px rgba(0,0,0,.45),
@@ -105,8 +144,10 @@ export const ExpenseDrillDown = ({ customerId, onRefresh }: Props) => {
       <div
         style={{
           display: "flex",
+
           justifyContent: "space-between",
-          alignItems: "center",
+
+          alignItems: "flex-start",
 
           marginBottom: "22px",
         }}
@@ -114,8 +155,11 @@ export const ExpenseDrillDown = ({ customerId, onRefresh }: Props) => {
         <h2
           style={{
             color: "white",
+
             fontSize: "24px",
+
             fontWeight: 800,
+
             margin: 0,
           }}
         >
@@ -124,22 +168,88 @@ export const ExpenseDrillDown = ({ customerId, onRefresh }: Props) => {
 
         <div
           style={{
-            background: "rgba(34,197,94,.12)",
+            display: "flex",
 
-            color: "#22c55e",
+            flexDirection: "column",
 
-            padding: "8px 14px",
+            alignItems: "center",
 
-            borderRadius: "999px",
-
-            fontSize: "13px",
-
-            fontWeight: 700,
-
-            border: "1px solid rgba(34,197,94,.18)",
+            gap: "10px",
           }}
         >
-          {data.length} registros
+          <div
+            style={{
+              background: "rgba(34,197,94,.12)",
+
+              color: "#22c55e",
+
+              padding: "8px 14px",
+
+              borderRadius: "999px",
+
+              fontSize: "13px",
+
+              fontWeight: 700,
+
+              border: "1px solid rgba(34,197,94,.18)",
+            }}
+          >
+            {data.length} registros
+          </div>
+
+          <div
+            onDoubleClick={handleSelectAll}
+            style={{
+              display: "flex",
+
+              alignItems: "center",
+
+              gap: "10px",
+
+              cursor: "pointer",
+
+              userSelect: "none",
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={selectAll}
+              readOnly
+              style={{
+                width: "22px",
+
+                height: "22px",
+
+                cursor: "pointer",
+              }}
+            />
+
+            <span
+              style={{
+                color: "white",
+
+                fontWeight: 700,
+
+                fontSize: "16px",
+              }}
+            >
+              {selectAll ? "Deseleccionar todos" : "Seleccionar todos"}
+            </span>
+          </div>
+
+          {selectAll && (
+            <span
+              style={{
+                color: "#00e676",
+
+                fontWeight: 700,
+
+                fontSize: "14px",
+              }}
+            >
+              {data.length} seleccionados
+            </span>
+          )}
         </div>
       </div>
 
@@ -147,14 +257,16 @@ export const ExpenseDrillDown = ({ customerId, onRefresh }: Props) => {
       <div
         style={{
           display: "flex",
+
           flexDirection: "column",
-          gap: "16px",
+
+          gap: "18px",
 
           maxHeight: "720px",
 
           overflowY: "auto",
 
-          paddingRight: "4px",
+          paddingRight: "6px",
         }}
       >
         {data.map((item) => (
@@ -163,6 +275,7 @@ export const ExpenseDrillDown = ({ customerId, onRefresh }: Props) => {
             item={item}
             onSaved={refetch}
             onChange={handleChange}
+            globalChecked={selectAll}
           />
         ))}
       </div>
@@ -170,7 +283,7 @@ export const ExpenseDrillDown = ({ customerId, onRefresh }: Props) => {
       {/* FOOTER */}
       <div
         style={{
-          marginTop: "20px",
+          marginTop: "24px",
 
           display: "flex",
 
@@ -181,9 +294,9 @@ export const ExpenseDrillDown = ({ customerId, onRefresh }: Props) => {
           onClick={handleSaveAll}
           disabled={!changes.length}
           style={{
-            padding: "14px 22px",
+            padding: "16px 28px",
 
-            borderRadius: "14px",
+            borderRadius: "16px",
 
             border: "none",
 
@@ -193,7 +306,9 @@ export const ExpenseDrillDown = ({ customerId, onRefresh }: Props) => {
 
             color: "white",
 
-            fontWeight: 700,
+            fontWeight: 800,
+
+            fontSize: "15px",
 
             cursor: !changes.length ? "not-allowed" : "pointer",
 
@@ -207,6 +322,22 @@ export const ExpenseDrillDown = ({ customerId, onRefresh }: Props) => {
           💾 Guardar cambios
         </button>
       </div>
+
+      {/* MODAL CONFIRM */}
+      <ConfirmModal
+        isOpen={showConfirm}
+        message="¿Deseas guardar los cambios seleccionados?"
+        onConfirm={confirmSave}
+        onCancel={() => setShowConfirm(false)}
+      />
+
+      {/* MODAL SUCCESS */}
+      <ConfirmModal
+        isOpen={showSuccess}
+        message="Cambios guardados correctamente"
+        onConfirm={() => setShowSuccess(false)}
+        onCancel={() => setShowSuccess(false)}
+      />
     </div>
   );
 };

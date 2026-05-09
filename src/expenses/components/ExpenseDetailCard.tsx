@@ -1,10 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { formatMoney } from "../../shared/utils/money.util";
-
 import { validateDecimalInput } from "../../shared/utils/numberInput.util";
-
 import { expenseService } from "../services/expense.service";
-
 import type { ExpenseDetail } from "../interfaces/expense-detail.interface";
 
 interface ExpenseChange {
@@ -17,18 +14,26 @@ interface ExpenseChange {
 interface Props {
   item: ExpenseDetail;
   onSaved?: () => void;
-
   onChange?: (change: ExpenseChange) => void;
+  globalChecked?: boolean;
 }
 
-export const ExpenseDetailCard = ({ item, onSaved, onChange }: Props) => {
+export const ExpenseDetailCard = ({
+  item,
+  onSaved,
+  onChange,
+  globalChecked,
+}: Props) => {
   const [isEditing, setIsEditing] = useState(false);
-
   const [loading, setLoading] = useState(false);
-
   const [checked, setChecked] = useState(false);
-
   const [amount, setAmount] = useState(formatMoney(Number(item.amount)));
+
+  useEffect(() => {
+    if (globalChecked !== undefined) {
+      setChecked(globalChecked);
+    }
+  }, [globalChecked]);
 
   const handleSave = async () => {
     try {
