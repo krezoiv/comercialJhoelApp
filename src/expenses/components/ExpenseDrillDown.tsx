@@ -74,9 +74,10 @@ export const ExpenseDrillDown = ({ customerId, onRefresh }: Props) => {
   return (
     <div
       style={{
-        width: "100%",
-        minWidth: "420px",
-        maxWidth: "520px",
+        width: "90%",
+        maxWidth: "950px",
+        minWidth: "700px",
+        margin: "0 auto",
 
         background: `
           linear-gradient(

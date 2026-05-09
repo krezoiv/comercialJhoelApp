@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { formatMoney } from "../../shared/utils/money.util";
 
 import { validateDecimalInput } from "../../shared/utils/numberInput.util";
@@ -29,25 +29,6 @@ export const ExpenseDetailCard = ({ item, onSaved, onChange }: Props) => {
   const [checked, setChecked] = useState(false);
 
   const [amount, setAmount] = useState(formatMoney(Number(item.amount)));
-
-  const isFirstRender = useRef(true);
-
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-
-    onChange?.({
-      id: item.id,
-
-      amount: Number(amount.replace(/,/g, "")),
-
-      createdAt: new Date(item.createdAt).toISOString(),
-
-      checked,
-    });
-  }, [amount, checked, item.id, item.createdAt, onChange]);
 
   const handleSave = async () => {
     try {
@@ -181,16 +162,21 @@ export const ExpenseDetailCard = ({ item, onSaved, onChange }: Props) => {
           value={amount}
           disabled={!isEditing}
           onChange={(e) => {
-            const raw = e.target.value.replace(/,/g, "");
+            const value = validateDecimalInput(e.target.value);
 
-            const validated = validateDecimalInput(
-              raw,
-              amount.replace(/,/g, ""),
-            );
+            if (value === null) return;
 
-            if (validated !== null) {
-              setAmount(validated);
-            }
+            setAmount(value);
+
+            onChange?.({
+              id: item.id,
+
+              amount: Number(value.replace(/,/g, "")),
+
+              createdAt: new Date(item.createdAt).toISOString(),
+
+              checked,
+            });
           }}
           onBlur={() => {
             const numeric = Number(amount.replace(/,/g, ""));
@@ -283,14 +269,50 @@ export const ExpenseDetailCard = ({ item, onSaved, onChange }: Props) => {
             fontSize: "15px",
           }}
         >
-          Eliminar
-          <input
-            type="checkbox"
-            checked={checked}
-            onChange={(e) => {
-              setChecked(e.target.checked);
+          <div
+            onDoubleClick={() => {
+              const value = !checked;
+
+              setChecked(value);
+
+              onChange?.({
+                id: item.id,
+
+                amount: Number(amount.replace(/,/g, "")),
+
+                createdAt: new Date(item.createdAt).toISOString(),
+
+                checked: value,
+              });
             }}
-          />
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              cursor: "pointer",
+              userSelect: "none",
+            }}
+          >
+            <span
+              style={{
+                color: "white",
+                fontWeight: 600,
+              }}
+            >
+              Eliminar
+            </span>
+
+            <input
+              type="checkbox"
+              checked={checked}
+              readOnly
+              style={{
+                width: "18px",
+                height: "18px",
+                cursor: "pointer",
+              }}
+            />
+          </div>
         </label>
       </div>
 

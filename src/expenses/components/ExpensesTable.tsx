@@ -23,140 +23,85 @@ export const ExpensesTable = ({ data, onRefresh }: Props) => {
 
       <tbody>
         {data.map((c) => (
-          <tr
-            key={c.customerId}
-            style={expensesTableStyles.row}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(15,23,42,.92)";
-
-              e.currentTarget.style.transform = "translateY(-2px)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "transparent";
-
-              e.currentTarget.style.transform = "translateY(0px)";
-            }}
-          >
-            {/* CLIENTE */}
-            <td style={expensesTableStyles.td}>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "14px",
-                }}
-              >
-                {/* AVATAR */}
-                <div
-                  style={{
-                    width: "48px",
-                    height: "48px",
-                    borderRadius: "50%",
-
-                    background: "linear-gradient(135deg,#6366f1,#3b82f6)",
-
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-
-                    color: "white",
-                    fontWeight: 700,
-                    fontSize: "18px",
-
-                    boxShadow: "0 0 18px rgba(99,102,241,.35)",
-                  }}
-                >
-                  {c.firstName.charAt(0)}
-                </div>
-
-                {/* INFO */}
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "flex-start",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontWeight: 700,
-                      fontSize: "16px",
-                    }}
-                  >
-                    {c.firstName} {c.lastName}
-                  </span>
-
-                  <span
-                    style={{
-                      opacity: 0.6,
-                      fontSize: "13px",
-                    }}
-                  >
-                    ID: {c.customerId.slice(0, 8)}
-                  </span>
-                </div>
-              </div>
-            </td>
-
-            {/* TOTAL */}
-            <td style={expensesTableStyles.td}>{c.totalExpenses}</td>
-
-            {/* MONTO */}
-            <td
-              style={{
-                ...expensesTableStyles.td,
-                color: "#22c55e",
-                fontWeight: 700,
-                fontSize: "16px",
+          <>
+            <tr
+              key={c.customerId}
+              style={expensesTableStyles.row}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(15,23,42,.92)";
+                e.currentTarget.style.transform = "translateY(-2px)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent";
+                e.currentTarget.style.transform = "translateY(0px)";
               }}
             >
-              Q {Number(c.totalAmount).toFixed(2)}
-            </td>
+              {/* CLIENTE */}
+              <td style={expensesTableStyles.td}>
+                {c.firstName} {c.lastName}
+              </td>
 
-            {/* ACTIONS */}
-            <td style={expensesTableStyles.td}>
-              <div style={expensesTableStyles.actions}>
-                {/* VER */}
-                <button
-                  style={{
-                    ...expensesTableStyles.viewButton,
-                  }}
-                  onClick={() =>
-                    setExpandedId(
-                      expandedId === c.customerId ? null : c.customerId,
-                    )
-                  }
-                >
-                  👁 Ver
-                </button>
+              {/* TOTAL */}
+              <td style={expensesTableStyles.td}>{c.totalExpenses}</td>
 
-                {/* EDITAR */}
-                <button
-                  style={{
-                    ...expensesTableStyles.editButton,
-                  }}
-                >
-                  ✏️ Editar
-                </button>
-              </div>
-            </td>
+              {/* MONTO */}
+              <td
+                style={{
+                  ...expensesTableStyles.td,
+                  color: "#22c55e",
+                  fontWeight: 700,
+                  fontSize: "16px",
+                }}
+              >
+                Q {Number(c.totalAmount).toFixed(2)}
+              </td>
+
+              {/* ACTIONS */}
+              <td style={expensesTableStyles.td}>
+                <div style={expensesTableStyles.actions}>
+                  <button
+                    style={expensesTableStyles.viewButton}
+                    onClick={() =>
+                      setExpandedId(
+                        expandedId === c.customerId ? null : c.customerId,
+                      )
+                    }
+                  >
+                    👁 Ver
+                  </button>
+
+                  <button style={expensesTableStyles.editButton}>
+                    ✏️ Editar
+                  </button>
+                </div>
+              </td>
+            </tr>
+
             {expandedId === c.customerId && (
               <tr>
                 <td
                   colSpan={4}
                   style={{
-                    padding: "0px",
+                    padding: "30px 0",
                     background: "transparent",
                   }}
                 >
-                  <ExpenseDrillDown
-                    customerId={c.customerId}
-                    onRefresh={onRefresh}
-                  />
+                  <div
+                    style={{
+                      width: "100%",
+                      display: "flex",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <ExpenseDrillDown
+                      customerId={c.customerId}
+                      onRefresh={onRefresh}
+                    />
+                  </div>
                 </td>
               </tr>
             )}
-          </tr>
+          </>
         ))}
       </tbody>
     </table>
