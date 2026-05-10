@@ -43,11 +43,8 @@ export const ExpenseDetailCard = ({
         data: [
           {
             id: item.id,
-
             amount: Number(amount.replace(/,/g, "")),
-
             createdAt: new Date(item.createdAt).toISOString(),
-
             checked,
           },
         ],
@@ -67,19 +64,13 @@ export const ExpenseDetailCard = ({
     <div
       style={{
         background: "rgba(2,6,23,.92)",
-
         border: checked
           ? "1px solid rgba(239,68,68,.45)"
           : "1px solid rgba(255,255,255,.04)",
-
         borderRadius: "24px",
-
         padding: "22px",
-
         position: "relative",
-
         transition: "all .25s ease",
-
         opacity: checked ? 0.65 : 1,
       }}
     >
@@ -88,7 +79,6 @@ export const ExpenseDetailCard = ({
         onDoubleClick={() => setChecked(!checked)}
         style={{
           position: "absolute",
-
           top: "20px",
 
           right: "20px",
@@ -111,12 +101,8 @@ export const ExpenseDetailCard = ({
       <h3
         style={{
           color: "white",
-
-          margin: 0,
-
-          fontSize: "18px",
-
-          fontWeight: 800,
+          fontSize: "15px",
+          fontWeight: 700,
         }}
       >
         {item.firstName} {item.lastName}
@@ -125,37 +111,43 @@ export const ExpenseDetailCard = ({
       {/* TYPE */}
       <div
         style={{
-          marginTop: "10px",
-
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          fontSize: "18px",
+          fontWeight: 700,
           color: "#38bdf8",
-
-          fontSize: "15px",
         }}
       >
-        🏦 {item.expenseType}
+        <span>🏦</span>
+        <span>{item.expenseType}</span>
       </div>
 
       {/* DESCRIPTION */}
       <div
         style={{
-          marginTop: "14px",
-
-          color: "white",
-
-          fontSize: "15px",
+          color: "rgba(255,255,255,.82)",
+          fontSize: "14px",
+          fontWeight: 500,
         }}
       >
-        🪪 {item.description}
+        💳 {item.description}
       </div>
 
       {/* DATE */}
       <div
         style={{
-          marginTop: "14px",
-
-          color: "#64748b",
-
-          fontSize: "14px",
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "6px",
+          width: "fit-content",
+          padding: "6px 10px",
+          borderRadius: "999px",
+          background: "rgba(255,255,255,.04)",
+          border: "1px solid rgba(255,255,255,.05)",
+          color: "#94a3b8",
+          fontSize: "12px",
+          fontWeight: 600,
         }}
       >
         📅 {new Date(item.createdAt).toLocaleString()}
@@ -192,24 +184,16 @@ export const ExpenseDetailCard = ({
           }}
           style={{
             width: "100%",
-
-            padding: "18px",
-
-            borderRadius: "18px",
-
-            border: isEditing
-              ? "2px solid #1ea7ff"
-              : "1px solid rgba(255,255,255,.06)",
-
-            background: "rgba(255,255,255,.08)",
-
+            height: "48px",
+            borderRadius: "14px",
+            border: "1px solid rgba(255,255,255,.04)",
+            background: "rgba(15,23,42,.88)",
             color: "white",
-
-            fontSize: "18px",
-
-            fontWeight: 700,
-
+            fontSize: "22px",
+            fontWeight: 800,
+            padding: "0 16px",
             outline: "none",
+            boxShadow: "inset 0 1px 4px rgba(0,0,0,.25)",
           }}
         />
       </div>
@@ -237,16 +221,12 @@ export const ExpenseDetailCard = ({
           }}
           style={{
             border: "none",
-
-            padding: "14px 20px",
-
-            borderRadius: "16px",
-
-            cursor: "pointer",
-
             color: "white",
-
+            padding: "10px 16px",
+            borderRadius: "12px",
             fontWeight: 700,
+            fontSize: "13px",
+            cursor: "pointer",
 
             background:
               isEditing || checked
@@ -277,16 +257,11 @@ export const ExpenseDetailCard = ({
           <div
             onDoubleClick={() => {
               const value = !checked;
-
               setChecked(value);
-
               onChange?.({
                 id: item.id,
-
                 amount: Number(amount.replace(/,/g, "")),
-
                 createdAt: new Date(item.createdAt).toISOString(),
-
                 checked: value,
               });
             }}
@@ -298,14 +273,19 @@ export const ExpenseDetailCard = ({
               userSelect: "none",
             }}
           >
-            <span
+            <div
               style={{
-                color: "white",
-                fontWeight: 600,
+                display: "flex",
+                fontSize: "15px",
+                alignItems: "center",
+                gap: "8px",
+                color: "#ef4444",
+                fontWeight: 700,
               }}
             >
-              Eliminar
-            </span>
+              <span style={{ fontSize: "14px" }}>🗑</span>
+              <span>Eliminar</span>
+            </div>
 
             <input
               type="checkbox"
@@ -324,11 +304,9 @@ export const ExpenseDetailCard = ({
       {/* FOOTER */}
       <div
         style={{
-          marginTop: "18px",
-
           color: "#64748b",
-
-          fontSize: "14px",
+          fontSize: "10px",
+          marginTop: "16px",
         }}
       >
         creado por: {item.userName}

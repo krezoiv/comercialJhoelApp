@@ -84,6 +84,12 @@ export const AgentDrillDown = ({ customerId, onRefresh }: Props) => {
 
       await bankAgentService.processBankAgents(data);
 
+      setShowConfirm(false);
+
+      setChanges([]);
+
+      await fetchData();
+
       onRefresh();
 
       setEditingId(null);
@@ -226,16 +232,17 @@ export const AgentDrillDown = ({ customerId, onRefresh }: Props) => {
 
               {selectAll ? "Marcar todos" : "Marcar todos"}
             </label>
-
-            <span
-              style={{
-                fontSize: "10px",
-                color: "#22c55e",
-                fontWeight: 700,
-              }}
-            >
-              {data.filter((x) => x.checked).length} seleccionados
-            </span>
+            {selectAll && (
+              <span
+                style={{
+                  fontSize: "10px",
+                  color: "#22c55e",
+                  fontWeight: 700,
+                }}
+              >
+                {data.length} seleccionados
+              </span>
+            )}
           </div>
         </div>
 
@@ -288,10 +295,8 @@ export const AgentDrillDown = ({ customerId, onRefresh }: Props) => {
                       display: "flex",
                       alignItems: "center",
                       gap: "8px",
-
                       fontSize: "18px",
                       fontWeight: 700,
-
                       color: "#38bdf8",
                     }}
                   >
@@ -333,13 +338,9 @@ export const AgentDrillDown = ({ customerId, onRefresh }: Props) => {
                   style={{
                     width: "18px",
                     height: "18px",
-
                     borderRadius: "50%",
-
                     background: item.checked ? "#ef4444" : "#475569",
-
                     cursor: "pointer",
-
                     transition: "all .2s ease",
                   }}
                 />
@@ -370,25 +371,15 @@ export const AgentDrillDown = ({ customerId, onRefresh }: Props) => {
                   }}
                   style={{
                     width: "100%",
-
                     height: "48px",
-
                     borderRadius: "14px",
-
                     border: "1px solid rgba(255,255,255,.04)",
-
                     background: "rgba(15,23,42,.88)",
-
                     color: "white",
-
                     fontSize: "22px",
-
                     fontWeight: 800,
-
                     padding: "0 16px",
-
                     outline: "none",
-
                     boxShadow: "inset 0 1px 4px rgba(0,0,0,.25)",
                   }}
                 />
@@ -414,19 +405,12 @@ export const AgentDrillDown = ({ customerId, onRefresh }: Props) => {
                         : "linear-gradient(135deg,#2563eb,#1d4ed8)",
 
                     border: "none",
-
                     color: "white",
-
                     padding: "10px 16px",
-
                     borderRadius: "12px",
-
                     fontWeight: 700,
-
                     fontSize: "13px",
-
                     cursor: "pointer",
-
                     boxShadow:
                       editingId === item.id
                         ? "0 8px 20px rgba(34,197,94,.35)"
@@ -508,15 +492,14 @@ export const AgentDrillDown = ({ customerId, onRefresh }: Props) => {
           >
             💾 Guardar cambios
           </button>
+          <ConfirmModal
+            isOpen={showConfirm}
+            message="¿Deseas guardar los cambios seleccionados?"
+            onCancel={() => setShowConfirm(false)}
+            onConfirm={handleSave}
+          />
         </div>
       </div>
-
-      <ConfirmModal
-        isOpen={showConfirm}
-        message="¿Deseas guardar los cambios seleccionados?"
-        onCancel={() => setShowConfirm(false)}
-        onConfirm={handleSave}
-      />
     </>
   );
 };
