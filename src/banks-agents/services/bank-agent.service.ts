@@ -28,11 +28,12 @@ export const bankAgentService = {
   processBankAgents: async (data: DetailItem[]) => {
     const payload = data.map((item) => ({
       id: item.id,
-      amount: Number(item.amount),
+      amount: parseFloat(String(item.amount)),
       createdAt: new Date(item.createdAt).toISOString(),
-      checked: item.checked,
+      checked: Boolean(item.checked),
     }));
 
+    console.log("📦 PAYLOAD:", JSON.stringify(payload, null, 2));
     console.log("📤 PAYLOAD:", payload);
 
     const res = await api.post("/bankAgents/process", {
@@ -40,5 +41,13 @@ export const bankAgentService = {
     });
 
     return res.data;
+  },
+
+  getBankAgentsByCustomerId: async (customerId: string) => {
+    const res = await api.get(`/bankAgents/customer/${customerId}`);
+
+    console.log("🔥 DRILL RESPONSE:", res.data);
+
+    return res.data.data;
   },
 };

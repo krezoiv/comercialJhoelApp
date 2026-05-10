@@ -11,7 +11,6 @@ interface Client {
   firstName: string;
   lastName: string;
 }
-
 interface Props {
   onSubmit: (data: {
     customerId: string;
@@ -20,12 +19,12 @@ interface Props {
     description: string;
     userId: string;
     paymentDate: string;
-  }) => void;
+  }) => Promise<void>;
 
-  errorMessage?: string | null; // ✅ AQUÍ SÍ VA
+  onSuccess: () => void;
 }
 
-export const BankAgentForm = ({ onSubmit, errorMessage }: Props) => {
+export const AgentsForms = ({ onSubmit, onSuccess }: Props) => {
   const { userId } = useUser();
   const [amount, setAmount] = useState("");
   const [banks, setBanks] = useState<Bank[]>([]);
@@ -105,11 +104,13 @@ export const BankAgentForm = ({ onSubmit, errorMessage }: Props) => {
       await onSubmit({
         customerId: selectedClient.id,
         bankId: selectedBank,
-        userId: userId,
+        userId,
         amount: Number(amount),
         description,
         paymentDate: date,
       });
+
+      onSuccess();
 
       // ✅ SOLO SI TODO SALE BIEN
 
@@ -374,21 +375,6 @@ export const BankAgentForm = ({ onSubmit, errorMessage }: Props) => {
           }}
         >
           💳 Transacción guardada -----
-        </div>
-      )}
-      {errorMessage && (
-        <div
-          style={{
-            background: "#ff4d4f",
-            color: "white",
-            padding: "10px",
-            borderRadius: "6px",
-            marginTop: "10px",
-            fontWeight: "bold",
-            textAlign: "center",
-          }}
-        >
-          {errorMessage}
         </div>
       )}
     </>

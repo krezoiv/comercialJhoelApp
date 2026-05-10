@@ -9,8 +9,9 @@ import { ExpensesPage } from "../expenses/pages/ExpensesPage";
 
 import { MainLayout } from "../MainLayout";
 import { routes } from "./routes";
-import { BankAgentsPage } from "../banks-agents/pages/BankAgentPage";
+
 import { CustomersPage } from "../customers/pages/CustomersPage";
+import { BankAgentPage } from "../banks-agents/pages/BankAgentPage";
 
 export const AppRouter = () => {
   return (
@@ -31,7 +32,7 @@ export const AppRouter = () => {
           <Route path={routes.dashboard} element={<DashboardPage />} />
           <Route path={routes.banks} element={<BanksPage />} />
           <Route path={routes.gastos} element={<ExpensesPage />} />
-          <Route path={routes.agentes} element={<BankAgentsPage />} />
+          <Route path={routes.agentes} element={<BankAgentPage />} />
           <Route path={routes.clientes} element={<CustomersPage />} />
           BankAgentsPage
         </Route>

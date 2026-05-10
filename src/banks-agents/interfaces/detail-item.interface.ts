@@ -3,9 +3,9 @@ export interface DetailItem {
   amount: string | number;
   createdAt: string;
   checked: boolean;
+  customerName: string;
   bankName: string;
-  firstName: string;
-  lastName: string;
-  paymentDate: string;
+  description: string;
+  createdBy: string;
   userName: string;
 }

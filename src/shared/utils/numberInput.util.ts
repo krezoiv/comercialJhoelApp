@@ -1,17 +1,17 @@
-export const validateDecimalInput = (
-  value: string,
-  previous: string = "",
-): string | null => {
-  // Permitir vacío
+export const validateDecimalInput = (value: string): string | null => {
+  // permitir vacío
   if (value === "") return "";
 
-  // Solo números y punto decimal
-  if (!/^\d*\.?\d*$/.test(value)) return null;
+  // solo números y decimal
+  if (!/^\d*\.?\d*$/.test(value)) {
+    return null;
+  }
 
-  // Máximo 2 decimales
-  if (value.includes(".")) {
-    const [, decimals] = value.split(".");
-    if (decimals.length > 2) return previous;
+  // máximo 2 decimales
+  const parts = value.split(".");
+
+  if (parts[1] && parts[1].length > 2) {
+    return null;
   }
 
   return value;
